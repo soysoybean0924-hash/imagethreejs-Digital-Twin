@@ -1,0 +1,61 @@
+{
+  "sourceProject": "hoainho/img2threejs-inspired workflow",
+  "sourceImage": "assets/5g-tower-frameless-3d.png",
+  "modelName": "5G Communication Tower Digital Twin",
+  "method": {
+    "intent": "Use a reference image as a design brief, then rebuild the subject as structured Three.js geometry instead of treating the image as a flat texture.",
+    "steps": [
+      "Read the image and isolate visible engineering objects.",
+      "Convert objects into named components with approximate scale, role, and connection semantics.",
+      "Create the model with procedural Three.js primitives and reusable factories.",
+      "Expose layers for technical review: fronthaul, backhaul, power, ground, and monitoring.",
+      "Run a quality gate that checks required components, connections, and UI references."
+    ]
+  },
+  "qualityGate": {
+    "minimumComponents": 10,
+    "requiredLayers": ["fronthaul", "backhaul", "power", "ground", "monitoring"],
+    "requiredComponents": [
+      "tower-lattice",
+      "gps-beidou-timing",
+      "aau-array",
+      "ecpri-fronthaul",
+      "equipment-cabinet",
+      "du-module",
+      "cu-module",
+      "power-distribution",
+      "ground-spd",
+      "edge-data-center",
+      "5gc-cloud"
+    ],
+    "requiredConnections": [
+      "AAU/RU -> DU",
+      "DU -> CU",
+      "CU -> Edge Data Center",
+      "Edge Data Center -> 5GC",
+      "AC Input -> Rectifier",
+      "Cabinet -> Ground/SPD"
+    ]
+  },
+  "components": [
+    { "id": "tower-lattice", "label": "Steel lattice tower", "role": "structural support", "layer": "structure", "approxPosition": [0, 7.5, 0] },
+    { "id": "gps-beidou-timing", "label": "GPS / BeiDou timing antenna", "role": "clock synchronization", "layer": "timing", "approxPosition": [-0.65, 18.6, -0.35] },
+    { "id": "aau-array", "label": "AAU / RU antenna array", "role": "radio access and beamforming", "layer": "radio", "approxPosition": [0, 15.0, 0] },
+    { "id": "ecpri-fronthaul", "label": "eCPRI fronthaul fibers", "role": "low-latency AAU to DU transport", "layer": "fronthaul", "approxPosition": [0.1, 10.0, 0.2] },
+    { "id": "equipment-cabinet", "label": "Base equipment cabinet", "role": "site equipment enclosure", "layer": "cabinet", "approxPosition": [0, 2.5, 2.3] },
+    { "id": "du-module", "label": "DU module", "role": "distributed unit lower-layer processing", "layer": "cabinet", "approxPosition": [0, 4.75, 1.58] },
+    { "id": "cu-module", "label": "CU module", "role": "centralized unit control/user-plane handling", "layer": "cabinet", "approxPosition": [0, 4.03, 1.58] },
+    { "id": "power-distribution", "label": "AC and -48V DC power", "role": "power conversion and distribution", "layer": "power", "approxPosition": [-2.0, 1.5, 2.8] },
+    { "id": "ground-spd", "label": "Grounding and surge protection", "role": "safety and lightning protection", "layer": "ground", "approxPosition": [3.8, 0.5, 4.6] },
+    { "id": "edge-data-center", "label": "Edge data center / MEC", "role": "local compute and transport aggregation", "layer": "backhaul", "approxPosition": [6.2, 1.2, -2.9] },
+    { "id": "5gc-cloud", "label": "5GC core cloud", "role": "core network services", "layer": "backhaul", "approxPosition": [8.2, 5.2, -4.2] }
+  ],
+  "connections": [
+    { "id": "aauru-du", "label": "AAU/RU -> DU", "kind": "fronthaul", "color": "#f2c94c" },
+    { "id": "du-cu", "label": "DU -> CU", "kind": "internal-cabinet", "color": "#7fc8ff" },
+    { "id": "cu-edge", "label": "CU -> Edge Data Center", "kind": "backhaul", "color": "#2d9cdb" },
+    { "id": "edge-5gc", "label": "Edge Data Center -> 5GC", "kind": "core", "color": "#2d9cdb" },
+    { "id": "ac-rectifier", "label": "AC Input -> Rectifier", "kind": "power", "color": "#f2994a" },
+    { "id": "cabinet-ground", "label": "Cabinet -> Ground/SPD", "kind": "ground", "color": "#27ae60" }
+  ]
+}

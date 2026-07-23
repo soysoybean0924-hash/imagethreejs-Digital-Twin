@@ -6,7 +6,8 @@
   "description": "Image-to-Three.js 5G communication tower digital twin research prototype.",
   "scripts": {
     "start": "python -m http.server 5173",
-    "serve": "python -m http.server 5173"
+    "serve": "python -m http.server 5173",
+    "test": "node --check src/main.js && node scripts/validate-spec.mjs"
   },
   "keywords": [
     "threejs",

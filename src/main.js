@@ -1,5 +1,6 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.166.1/build/three.module.js";
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.166.1/examples/jsm/controls/OrbitControls.js";
+import { getLayerConfig, getTowerSpec, summarizeSpec } from "./towerSpec.js";
 
 const canvas = document.querySelector("#scene");
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
@@ -20,6 +21,9 @@ controls.target.set(0, 6.5, 0);
 controls.maxPolarAngle = Math.PI * 0.49;
 controls.minDistance = 10;
 controls.maxDistance = 42;
+
+const towerSpec = getTowerSpec();
+const specSummary = summarizeSpec();
 
 const layers = {
   fronthaul: new THREE.Group(),
@@ -277,17 +281,11 @@ function buildLights() {
 
 function setupToggles() {
   const toggleRoot = document.querySelector("#layerToggles");
-  [
-    ["fronthaul", "eCPRI fronthaul"],
-    ["backhaul", "Backhaul / 5GC"],
-    ["power", "AC and -48V power"],
-    ["ground", "Grounding"],
-    ["monitoring", "Monitoring"],
-  ].forEach(([key, labelText]) => {
+  getLayerConfig().forEach(([key, labelText]) => {
     const button = document.createElement("button");
     button.className = "layer-toggle active";
     button.type = "button";
-    button.innerHTML = `<span></span>${labelText}`;
+    button.innerHTML = "<span></span>" + labelText;
     button.addEventListener("click", () => {
       layers[key].visible = !layers[key].visible;
       button.classList.toggle("active", layers[key].visible);
@@ -296,6 +294,21 @@ function setupToggles() {
   });
 }
 
+function populateSpecPanel() {
+  const statsRoot = document.querySelector("#specStats");
+  const componentRoot = document.querySelector("#specComponents");
+  if (!statsRoot || !componentRoot) return;
+
+  statsRoot.innerHTML = [
+    "<span>" + specSummary.componentCount + " components</span>",
+    "<span>" + specSummary.connectionCount + " connections</span>",
+    "<span>" + specSummary.requiredLayerCount + " review layers</span>",
+  ].join("");
+
+  componentRoot.innerHTML = towerSpec.components
+    .map((component) => "<li><strong>" + component.label + "</strong><span>" + component.role + "</span></li>")
+    .join("");
+}
 function resize() {
   const { clientWidth, clientHeight } = renderer.domElement.parentElement;
   renderer.setSize(clientWidth, clientHeight, false);
@@ -310,6 +323,7 @@ buildCabinet();
 buildExternalSystems();
 buildLights();
 setupToggles();
+populateSpecPanel();
 resize();
 window.addEventListener("resize", resize);
 
