@@ -1,5 +1,5 @@
 import spec from "./towerSpec.json" with { type: "json" };
-import { getText, resolveLocale } from "./i18n.js";
+import { getText, resolveLocale } from "./i18n.js?v=multidomain-1";
 
 export function getTowerSpec() {
   return spec;
@@ -13,6 +13,9 @@ export function getLayerConfig(locale = "en") {
     ["power", labels.power],
     ["ground", labels.ground],
     ["monitoring", labels.monitoring],
+    ["radio", labels.radio],
+    ["satellite", labels.satellite],
+    ["maritime", labels.maritime],
   ];
 }
 

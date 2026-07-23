@@ -1,20 +1,29 @@
 {
   "sourceProject": "hoainho/img2threejs-inspired workflow",
   "sourceImage": "assets/5g-tower-frameless-3d.png",
-  "modelName": "5G Communication Tower Digital Twin",
+  "modelName": "Space-Air-Sea-Ground Communication Digital Twin",
   "method": {
-    "intent": "Use a reference image as a design brief, then rebuild the subject as structured Three.js geometry instead of treating the image as a flat texture.",
+    "intent": "Use multiple reference images as a design brief, then rebuild the 5G tower, receiver/transmitter equipment, maritime communication ship, and LEO satellite as structured Three.js geometry instead of treating the images as flat textures.",
     "steps": [
-      "Read the image and isolate visible engineering objects.",
+      "Read the images and isolate visible engineering objects across ground, maritime, and orbital communication domains.",
       "Convert objects into named components with approximate scale, role, and connection semantics.",
       "Create the model with procedural Three.js primitives and reusable factories.",
-      "Expose layers for technical review: fronthaul, backhaul, power, ground, and monitoring.",
+      "Expose layers for technical review: fronthaul, backhaul, power, ground, monitoring, radio endpoints, maritime relay, and satellite links.",
       "Run a quality gate that checks required components, connections, and UI references."
     ]
   },
   "qualityGate": {
     "minimumComponents": 10,
-    "requiredLayers": ["fronthaul", "backhaul", "power", "ground", "monitoring"],
+    "requiredLayers": [
+      "fronthaul",
+      "backhaul",
+      "power",
+      "ground",
+      "monitoring",
+      "radio",
+      "satellite",
+      "maritime"
+    ],
     "requiredComponents": [
       "tower-lattice",
       "gps-beidou-timing",
@@ -26,7 +35,13 @@
       "power-distribution",
       "ground-spd",
       "edge-data-center",
-      "5gc-cloud"
+      "5gc-cloud",
+      "transmitter-terminal",
+      "receiver-terminal",
+      "maritime-communication-ship",
+      "leo-satellite",
+      "shipboard-gateway",
+      "satellite-payload"
     ],
     "requiredConnections": [
       "AAU/RU -> DU",
@@ -34,28 +49,269 @@
       "CU -> Edge Data Center",
       "Edge Data Center -> 5GC",
       "AC Input -> Rectifier",
-      "Cabinet -> Ground/SPD"
+      "Cabinet -> Ground/SPD",
+      "Transmitter -> 5G Tower",
+      "5G Tower -> Receiver",
+      "Ship Gateway -> 5G Tower",
+      "LEO Satellite -> Ship Gateway",
+      "LEO Satellite -> Ground Receiver"
     ]
   },
   "components": [
-    { "id": "tower-lattice", "label": "Steel lattice tower", "role": "structural support", "layer": "structure", "approxPosition": [0, 7.5, 0] },
-    { "id": "gps-beidou-timing", "label": "GPS / BeiDou timing antenna", "role": "clock synchronization", "layer": "timing", "approxPosition": [-0.65, 18.6, -0.35] },
-    { "id": "aau-array", "label": "AAU / RU antenna array", "role": "radio access and beamforming", "layer": "radio", "approxPosition": [0, 15.0, 0] },
-    { "id": "ecpri-fronthaul", "label": "eCPRI fronthaul fibers", "role": "low-latency AAU to DU transport", "layer": "fronthaul", "approxPosition": [0.1, 10.0, 0.2] },
-    { "id": "equipment-cabinet", "label": "Base equipment cabinet", "role": "site equipment enclosure", "layer": "cabinet", "approxPosition": [0, 2.5, 2.3] },
-    { "id": "du-module", "label": "DU module", "role": "distributed unit lower-layer processing", "layer": "cabinet", "approxPosition": [0, 4.75, 1.58] },
-    { "id": "cu-module", "label": "CU module", "role": "centralized unit control/user-plane handling", "layer": "cabinet", "approxPosition": [0, 4.03, 1.58] },
-    { "id": "power-distribution", "label": "AC and -48V DC power", "role": "power conversion and distribution", "layer": "power", "approxPosition": [-2.0, 1.5, 2.8] },
-    { "id": "ground-spd", "label": "Grounding and surge protection", "role": "safety and lightning protection", "layer": "ground", "approxPosition": [3.8, 0.5, 4.6] },
-    { "id": "edge-data-center", "label": "Edge data center / MEC", "role": "local compute and transport aggregation", "layer": "backhaul", "approxPosition": [6.2, 1.2, -2.9] },
-    { "id": "5gc-cloud", "label": "5GC core cloud", "role": "core network services", "layer": "backhaul", "approxPosition": [8.2, 5.2, -4.2] }
+    {
+      "id": "tower-lattice",
+      "label": "Steel lattice tower",
+      "role": "structural support",
+      "layer": "structure",
+      "approxPosition": [
+        0,
+        7.5,
+        0
+      ]
+    },
+    {
+      "id": "gps-beidou-timing",
+      "label": "GPS / BeiDou timing antenna",
+      "role": "clock synchronization",
+      "layer": "timing",
+      "approxPosition": [
+        -0.65,
+        18.6,
+        -0.35
+      ]
+    },
+    {
+      "id": "aau-array",
+      "label": "AAU / RU antenna array",
+      "role": "radio access and beamforming",
+      "layer": "radio",
+      "approxPosition": [
+        0,
+        15,
+        0
+      ]
+    },
+    {
+      "id": "ecpri-fronthaul",
+      "label": "eCPRI fronthaul fibers",
+      "role": "low-latency AAU to DU transport",
+      "layer": "fronthaul",
+      "approxPosition": [
+        0.1,
+        10,
+        0.2
+      ]
+    },
+    {
+      "id": "equipment-cabinet",
+      "label": "Base equipment cabinet",
+      "role": "site equipment enclosure",
+      "layer": "cabinet",
+      "approxPosition": [
+        0,
+        2.5,
+        2.3
+      ]
+    },
+    {
+      "id": "du-module",
+      "label": "DU module",
+      "role": "distributed unit lower-layer processing",
+      "layer": "cabinet",
+      "approxPosition": [
+        0,
+        4.75,
+        1.58
+      ]
+    },
+    {
+      "id": "cu-module",
+      "label": "CU module",
+      "role": "centralized unit control/user-plane handling",
+      "layer": "cabinet",
+      "approxPosition": [
+        0,
+        4.03,
+        1.58
+      ]
+    },
+    {
+      "id": "power-distribution",
+      "label": "AC and -48V DC power",
+      "role": "power conversion and distribution",
+      "layer": "power",
+      "approxPosition": [
+        -2,
+        1.5,
+        2.8
+      ]
+    },
+    {
+      "id": "ground-spd",
+      "label": "Grounding and surge protection",
+      "role": "safety and lightning protection",
+      "layer": "ground",
+      "approxPosition": [
+        3.8,
+        0.5,
+        4.6
+      ]
+    },
+    {
+      "id": "edge-data-center",
+      "label": "Edge data center / MEC",
+      "role": "local compute and transport aggregation",
+      "layer": "backhaul",
+      "approxPosition": [
+        6.2,
+        1.2,
+        -2.9
+      ]
+    },
+    {
+      "id": "5gc-cloud",
+      "label": "5GC core cloud",
+      "role": "core network services",
+      "layer": "backhaul",
+      "approxPosition": [
+        8.2,
+        5.2,
+        -4.2
+      ]
+    },
+    {
+      "id": "transmitter-terminal",
+      "label": "Transmitter terminal",
+      "role": "uplink source and signal injection point",
+      "layer": "radio",
+      "approxPosition": [
+        -7.5,
+        1.2,
+        -1.8
+      ]
+    },
+    {
+      "id": "receiver-terminal",
+      "label": "Receiver terminal",
+      "role": "downlink receiver and service endpoint",
+      "layer": "radio",
+      "approxPosition": [
+        7.4,
+        1.2,
+        2.6
+      ]
+    },
+    {
+      "id": "maritime-communication-ship",
+      "label": "Maritime communication ship",
+      "role": "sea-based relay platform with mast, radar, and onboard equipment bay",
+      "layer": "maritime",
+      "approxPosition": [
+        -8.8,
+        1.2,
+        -6.2
+      ]
+    },
+    {
+      "id": "shipboard-gateway",
+      "label": "Shipboard gateway cabinet",
+      "role": "ship radio, routing, and power gateway",
+      "layer": "maritime",
+      "approxPosition": [
+        -7.9,
+        1.9,
+        -5.6
+      ]
+    },
+    {
+      "id": "leo-satellite",
+      "label": "LEO communication satellite",
+      "role": "orbital relay with solar arrays and directional payload antenna",
+      "layer": "satellite",
+      "approxPosition": [
+        5.6,
+        18.2,
+        -7.6
+      ]
+    },
+    {
+      "id": "satellite-payload",
+      "label": "Satellite payload module",
+      "role": "spaceborne transponder and phased communication payload",
+      "layer": "satellite",
+      "approxPosition": [
+        5.6,
+        18.2,
+        -7.6
+      ]
+    }
   ],
   "connections": [
-    { "id": "aauru-du", "label": "AAU/RU -> DU", "kind": "fronthaul", "color": "#f2c94c" },
-    { "id": "du-cu", "label": "DU -> CU", "kind": "internal-cabinet", "color": "#7fc8ff" },
-    { "id": "cu-edge", "label": "CU -> Edge Data Center", "kind": "backhaul", "color": "#2d9cdb" },
-    { "id": "edge-5gc", "label": "Edge Data Center -> 5GC", "kind": "core", "color": "#2d9cdb" },
-    { "id": "ac-rectifier", "label": "AC Input -> Rectifier", "kind": "power", "color": "#f2994a" },
-    { "id": "cabinet-ground", "label": "Cabinet -> Ground/SPD", "kind": "ground", "color": "#27ae60" }
+    {
+      "id": "aauru-du",
+      "label": "AAU/RU -> DU",
+      "kind": "fronthaul",
+      "color": "#f2c94c"
+    },
+    {
+      "id": "du-cu",
+      "label": "DU -> CU",
+      "kind": "internal-cabinet",
+      "color": "#7fc8ff"
+    },
+    {
+      "id": "cu-edge",
+      "label": "CU -> Edge Data Center",
+      "kind": "backhaul",
+      "color": "#2d9cdb"
+    },
+    {
+      "id": "edge-5gc",
+      "label": "Edge Data Center -> 5GC",
+      "kind": "core",
+      "color": "#2d9cdb"
+    },
+    {
+      "id": "ac-rectifier",
+      "label": "AC Input -> Rectifier",
+      "kind": "power",
+      "color": "#f2994a"
+    },
+    {
+      "id": "cabinet-ground",
+      "label": "Cabinet -> Ground/SPD",
+      "kind": "ground",
+      "color": "#27ae60"
+    },
+    {
+      "id": "tx-tower",
+      "label": "Transmitter -> 5G Tower",
+      "kind": "radio",
+      "color": "#00b7ff"
+    },
+    {
+      "id": "tower-rx",
+      "label": "5G Tower -> Receiver",
+      "kind": "radio",
+      "color": "#00b7ff"
+    },
+    {
+      "id": "ship-tower",
+      "label": "Ship Gateway -> 5G Tower",
+      "kind": "maritime",
+      "color": "#14b8a6"
+    },
+    {
+      "id": "leo-ship",
+      "label": "LEO Satellite -> Ship Gateway",
+      "kind": "satellite",
+      "color": "#f8fafc"
+    },
+    {
+      "id": "leo-rx",
+      "label": "LEO Satellite -> Ground Receiver",
+      "kind": "satellite",
+      "color": "#f8fafc"
+    }
   ]
 }

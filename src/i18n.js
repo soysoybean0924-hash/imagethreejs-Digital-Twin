@@ -6,6 +6,9 @@ export const TEXT = {
       power: "AC and -48V power",
       ground: "Grounding",
       monitoring: "Monitoring",
+      radio: "Tx / Rx terminals",
+      satellite: "LEO satellite link",
+      maritime: "Maritime relay",
     },
     statLabels: {
       components: "components",
@@ -27,6 +30,12 @@ export const TEXT = {
       rectifier: "Rectifier",
       battery: "Battery",
       ec: "EC",
+      "transmitter-terminal": "Transmitter terminal",
+      "receiver-terminal": "Receiver terminal",
+      "maritime-communication-ship": "Maritime communication ship",
+      "shipboard-gateway": "Shipboard gateway",
+      "leo-satellite": "LEO satellite",
+      "satellite-payload": "Satellite payload",
     },
   },
   zh: {
@@ -36,6 +45,9 @@ export const TEXT = {
       power: "\u4ea4\u6d41\u4e0e -48V \u7535\u6e90",
       ground: "\u63a5\u5730\u7cfb\u7edf",
       monitoring: "\u76d1\u63a7\u544a\u8b66",
+      radio: "\u53d1\u9001 / \u63a5\u6536\u7ec8\u7aef",
+      satellite: "\u4f4e\u8f68\u536b\u661f\u94fe\u8def",
+      maritime: "\u6d77\u4e0a\u4e2d\u7ee7",
     },
     statLabels: {
       components: "\u4e2a\u7ec4\u4ef6",
@@ -57,6 +69,12 @@ export const TEXT = {
       rectifier: "\u6574\u6d41\u5668",
       battery: "\u84c4\u7535\u6c60",
       ec: "\u73af\u5883\u76d1\u63a7",
+      "transmitter-terminal": "\u53d1\u9001\u673a\u7ec8\u7aef",
+      "receiver-terminal": "\u63a5\u6536\u673a\u7ec8\u7aef",
+      "maritime-communication-ship": "\u6d77\u4e0a\u901a\u4fe1\u8239",
+      "shipboard-gateway": "\u8239\u8f7d\u901a\u4fe1\u7f51\u5173",
+      "leo-satellite": "\u4f4e\u8f68\u901a\u4fe1\u536b\u661f",
+      "satellite-payload": "\u536b\u661f\u8f7d\u8377\u6a21\u5757",
     },
     componentOverrides: {
       "tower-lattice": { label: "\u94c1\u5854\u6841\u67b6\u7ed3\u6784", role: "\u627f\u8f7d AAU\u3001\u7ebf\u7f06\u548c\u6388\u65f6\u8bbe\u5907\u7684\u7ed3\u6784\u652f\u6491" },
@@ -69,7 +87,13 @@ export const TEXT = {
       "power-distribution": { label: "\u4ea4\u6d41\u4e0e -48V \u76f4\u6d41\u7535\u6e90", role: "\u7535\u6e90\u8f6c\u6362\u3001\u5206\u914d\u4e0e\u5907\u7535\u4fdd\u969c" },
       "ground-spd": { label: "\u63a5\u5730\u4e0e\u6d6a\u6d8c\u4fdd\u62a4", role: "\u9632\u96f7\u3001\u5b89\u5168\u63a5\u5730\u548c\u8bbe\u5907\u4fdd\u62a4" },
       "edge-data-center": { label: "\u8fb9\u7f18\u6570\u636e\u4e2d\u5fc3 / MEC", role: "\u672c\u5730\u7b97\u529b\u3001\u4e1a\u52a1\u4e0b\u6c89\u4e0e\u4f20\u8f93\u6c47\u805a" },
-      "5gc-cloud": { label: "5GC \u6838\u5fc3\u7f51\u4e91", role: "\u6838\u5fc3\u7f51\u63a5\u5165\u3001\u4f1a\u8bdd\u3001\u7528\u6237\u9762\u548c\u6570\u636e\u7ba1\u7406" }
+      "5gc-cloud": { label: "5GC \u6838\u5fc3\u7f51\u4e91", role: "\u6838\u5fc3\u7f51\u63a5\u5165\u3001\u4f1a\u8bdd\u3001\u7528\u6237\u9762\u548c\u6570\u636e\u7ba1\u7406" },
+      "transmitter-terminal": { label: "\u53d1\u9001\u673a\u7ec8\u7aef", role: "\u4e0a\u884c\u4fe1\u53f7\u6e90\u4e0e\u5c04\u9891\u6ce8\u5165\u70b9" },
+      "receiver-terminal": { label: "\u63a5\u6536\u673a\u7ec8\u7aef", role: "\u4e0b\u884c\u63a5\u6536\u4e0e\u4e1a\u52a1\u7ec8\u70b9" },
+      "maritime-communication-ship": { label: "\u6d77\u4e0a\u901a\u4fe1\u8239", role: "\u642d\u8f7d\u96f7\u8fbe\u3001\u5929\u7ebf\u548c\u673a\u67dc\u7684\u6d77\u4e0a\u4e2d\u7ee7\u5e73\u53f0" },
+      "shipboard-gateway": { label: "\u8239\u8f7d\u901a\u4fe1\u7f51\u5173", role: "\u8239\u4e0a\u65e0\u7ebf\u3001\u8def\u7531\u548c\u7535\u6e90\u63a5\u5165\u8bbe\u5907" },
+      "leo-satellite": { label: "\u4f4e\u8f68\u901a\u4fe1\u536b\u661f", role: "\u5177\u5907\u592a\u9633\u7ffc\u548c\u5b9a\u5411\u8f7d\u8377\u5929\u7ebf\u7684\u8f68\u9053\u4e2d\u7ee7" },
+      "satellite-payload": { label: "\u536b\u661f\u8f7d\u8377\u6a21\u5757", role: "\u661f\u4e0a\u8f6c\u53d1\u3001\u6ce2\u675f\u63a7\u5236\u548c\u901a\u4fe1\u8f7d\u8377" }
     },
   },
 };

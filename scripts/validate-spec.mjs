@@ -53,6 +53,9 @@ if (index !== zhIndex) {
 for (const fileCheck of [
   [main, "towerSpec", "main imports the object spec"],
   [main, "getSceneLabel", "main can localize scene labels"],
+  [main, "buildLeoSatellite", "main builds the LEO satellite"],
+  [main, "buildMaritimeShip", "main builds the maritime relay"],
+  [main, "buildRadioTerminals", "main builds transmitter and receiver terminals"],
   [index, "Object Spec", "English UI exposes the object spec panel"],
   [zhIndex, "lang=\"zh-CN\"", "Chinese page declares zh-CN locale"],
   [zhIndex, "specStats", "Chinese UI exposes localized spec stats container"],

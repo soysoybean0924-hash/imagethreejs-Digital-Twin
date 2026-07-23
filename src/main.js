@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.166.1/examples/jsm/controls/OrbitControls.js";
-import { getComponentDisplay, getLayerConfig, getSceneLabel, getTowerSpec, summarizeSpec } from "./towerSpec.js";
+import { getComponentDisplay, getLayerConfig, getSceneLabel, getTowerSpec, summarizeSpec } from "./towerSpec.js?v=multidomain-1";
 
 const canvas = document.querySelector("#scene");
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
@@ -32,6 +32,9 @@ const layers = {
   power: new THREE.Group(),
   ground: new THREE.Group(),
   monitoring: new THREE.Group(),
+  radio: new THREE.Group(),
+  satellite: new THREE.Group(),
+  maritime: new THREE.Group(),
 };
 Object.values(layers).forEach((group) => scene.add(group));
 
@@ -45,6 +48,9 @@ const mat = {
   concrete: new THREE.MeshStandardMaterial({ color: 0xd9d5cc, roughness: 0.72 }),
   grass: new THREE.MeshStandardMaterial({ color: 0x91b98f, roughness: 0.85 }),
   cloud: new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0, roughness: 0.2 }),
+  hull: new THREE.MeshStandardMaterial({ color: 0x31465a, metalness: 0.3, roughness: 0.45 }),
+  ocean: new THREE.MeshStandardMaterial({ color: 0x1d6d86, metalness: 0.05, roughness: 0.62, transparent: true, opacity: 0.72 }),
+  solar: new THREE.MeshStandardMaterial({ color: 0x0f3f7a, metalness: 0.18, roughness: 0.28 }),
 };
 
 const cableMaterials = {
@@ -54,6 +60,9 @@ const cableMaterials = {
   ac: new THREE.MeshStandardMaterial({ color: 0xf2994a, emissive: 0x512500, emissiveIntensity: 0.16 }),
   ground: new THREE.MeshStandardMaterial({ color: 0x27ae60, emissive: 0x073b1d, emissiveIntensity: 0.18 }),
   monitoring: new THREE.MeshStandardMaterial({ color: 0x9b51e0, emissive: 0x2b0a49, emissiveIntensity: 0.18 }),
+  radio: new THREE.MeshStandardMaterial({ color: 0x00b7ff, emissive: 0x00344d, emissiveIntensity: 0.35, transparent: true, opacity: 0.82 }),
+  satellite: new THREE.MeshStandardMaterial({ color: 0xf8fafc, emissive: 0x6d88b5, emissiveIntensity: 0.55, transparent: true, opacity: 0.72 }),
+  maritime: new THREE.MeshStandardMaterial({ color: 0x14b8a6, emissive: 0x063b35, emissiveIntensity: 0.3, transparent: true, opacity: 0.82 }),
 };
 
 function roundedBox(width, height, depth, material) {
@@ -262,6 +271,106 @@ function buildExternalSystems() {
   label(getSceneLabel("5gc-cloud", locale), [8.2, 6.2, -4.1], "#0369a1");
 }
 
+
+function buildDish(position, rotation, scale = 1, material = mat.antenna) {
+  const dish = new THREE.Group();
+  const reflector = new THREE.Mesh(new THREE.ConeGeometry(0.9 * scale, 0.32 * scale, 40, 1, true), material);
+  reflector.rotation.x = Math.PI * 0.5;
+  reflector.castShadow = true;
+  dish.add(reflector);
+
+  const feed = cylinderBetween(new THREE.Vector3(0, 0, 0.02 * scale), new THREE.Vector3(0, 0.35 * scale, 0.78 * scale), 0.03 * scale, mat.darkSteel, 10);
+  dish.add(feed);
+  const feedHead = new THREE.Mesh(new THREE.SphereGeometry(0.08 * scale, 16, 8), mat.darkSteel);
+  feedHead.position.set(0, 0.39 * scale, 0.83 * scale);
+  dish.add(feedHead);
+
+  dish.position.set(...position);
+  dish.rotation.set(...rotation);
+  scene.add(dish);
+  return dish;
+}
+
+function buildRadioTerminals() {
+  const transmitter = new THREE.Group();
+  const txBase = roundedBox(1.25, 0.75, 0.9, mat.cabinet);
+  txBase.position.set(-7.4, 0.55, -1.7);
+  transmitter.add(txBase);
+  const txMast = cylinderBetween(new THREE.Vector3(-7.4, 0.9, -1.7), new THREE.Vector3(-7.4, 2.35, -1.7), 0.055, mat.darkSteel, 14);
+  transmitter.add(txMast);
+  scene.add(transmitter);
+  buildDish([-7.4, 2.35, -1.7], [0.15, 0.95, -0.1], 0.72);
+  label(getSceneLabel("transmitter-terminal", locale), [-7.25, 2.95, -1.7], "#075985");
+
+  const receiver = new THREE.Group();
+  const rxBase = roundedBox(1.25, 0.75, 0.9, mat.cabinet);
+  rxBase.position.set(7.4, 0.55, 2.55);
+  receiver.add(rxBase);
+  const rxMast = cylinderBetween(new THREE.Vector3(7.4, 0.9, 2.55), new THREE.Vector3(7.4, 2.2, 2.55), 0.055, mat.darkSteel, 14);
+  receiver.add(rxMast);
+  scene.add(receiver);
+  buildDish([7.4, 2.2, 2.55], [0.18, -0.95, 0.1], 0.72);
+  label(getSceneLabel("receiver-terminal", locale), [7.15, 2.8, 2.55], "#075985");
+
+  layers.radio.add(cable([[-7.1, 2.45, -1.6], [-3.0, 5.5, -0.5], [-0.6, 9.2, 0.2]], cableMaterials.radio, 0.035));
+  layers.radio.add(cable([[0.6, 9.2, 0.2], [3.5, 5.2, 1.4], [7.1, 2.35, 2.5]], cableMaterials.radio, 0.035));
+}
+
+function buildMaritimeShip() {
+  const ship = new THREE.Group();
+  const ocean = roundedBox(6.8, 0.08, 2.7, mat.ocean);
+  ocean.position.set(-8.8, 0.03, -6.25);
+  ship.add(ocean);
+
+  const hull = roundedBox(4.2, 0.58, 1.1, mat.hull);
+  hull.position.set(-8.8, 0.52, -6.25);
+  ship.add(hull);
+  const deck = roundedBox(3.2, 0.35, 0.95, mat.cabinet);
+  deck.position.set(-8.55, 1.0, -6.25);
+  ship.add(deck);
+  const bridge = roundedBox(1.25, 0.82, 0.78, mat.antenna);
+  bridge.position.set(-9.55, 1.55, -6.25);
+  ship.add(bridge);
+  const mast = cylinderBetween(new THREE.Vector3(-8.55, 1.2, -6.25), new THREE.Vector3(-8.55, 4.35, -6.25), 0.055, mat.darkSteel, 14);
+  ship.add(mast);
+  const shipRack = roundedBox(0.78, 1.0, 0.45, mat.module);
+  shipRack.position.set(-7.85, 1.65, -5.55);
+  ship.add(shipRack);
+  scene.add(ship);
+  buildDish([-7.35, 2.75, -6.15], [0.1, -0.35, 0.1], 0.55);
+  label(getSceneLabel("maritime-communication-ship", locale), [-9.8, 2.75, -6.25], "#0f766e");
+  label(getSceneLabel("shipboard-gateway", locale), [-7.2, 2.35, -5.35], "#0f766e");
+
+  layers.maritime.add(cable([[-7.3, 2.55, -5.7], [-4.0, 3.8, -3.1], [-0.2, 4.8, 1.2]], cableMaterials.maritime, 0.035));
+}
+
+function buildLeoSatellite() {
+  const sat = new THREE.Group();
+  const body = roundedBox(1.15, 1.7, 1.15, mat.cabinet);
+  body.position.set(5.6, 17.5, -7.6);
+  sat.add(body);
+  const payload = roundedBox(0.85, 0.65, 0.25, mat.module);
+  payload.position.set(5.6, 17.35, -6.98);
+  sat.add(payload);
+
+  const leftBoom = cylinderBetween(new THREE.Vector3(5.0, 17.55, -7.6), new THREE.Vector3(2.7, 17.55, -7.6), 0.035, mat.darkSteel, 10);
+  const rightBoom = cylinderBetween(new THREE.Vector3(6.2, 17.55, -7.6), new THREE.Vector3(8.5, 17.55, -7.6), 0.035, mat.darkSteel, 10);
+  sat.add(leftBoom);
+  sat.add(rightBoom);
+  for (const x of [1.9, 2.8, 8.4, 9.3]) {
+    const panel = roundedBox(0.78, 1.55, 0.08, mat.solar);
+    panel.position.set(x, 17.55, -7.6);
+    sat.add(panel);
+  }
+  scene.add(sat);
+  buildDish([5.6, 18.72, -7.1], [-0.45, 0, 0], 0.55);
+  label(getSceneLabel("leo-satellite", locale), [5.6, 19.45, -7.6], "#1e3a8a");
+  label(getSceneLabel("satellite-payload", locale), [6.95, 17.1, -6.95], "#1e3a8a");
+
+  layers.satellite.add(cable([[5.6, 17.9, -7.0], [0.8, 13.5, -3.2], [-7.35, 2.75, -6.15]], cableMaterials.satellite, 0.03));
+  layers.satellite.add(cable([[5.6, 17.9, -7.0], [6.2, 10.5, -2.4], [7.4, 2.35, 2.55]], cableMaterials.satellite, 0.03));
+}
+
 function buildLights() {
   const hemi = new THREE.HemisphereLight(0xffffff, 0xb2c0d0, 2.1);
   scene.add(hemi);
@@ -326,6 +435,9 @@ buildTower();
 buildAntennas();
 buildCabinet();
 buildExternalSystems();
+buildRadioTerminals();
+buildMaritimeShip();
+buildLeoSatellite();
 buildLights();
 setupToggles();
 populateSpecPanel();

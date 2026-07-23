@@ -1,6 +1,6 @@
 # imagethreejs-Digital-Twin
 
-`imagethreejs-Digital-Twin` is a research starter project for turning a 2D technical image into a browser-based 3D digital twin. The first prototype reconstructs a 5G communication tower from the supplied infographic: tower steel structure, AAU antenna units, GPS/BeiDou timing antenna, eCPRI fronthaul, DU/CU cabinet, power and grounding routes, backhaul, edge data center, and 5GC cloud relationship.
+`imagethreejs-Digital-Twin` is a research starter project for turning a 2D technical image into a browser-based 3D digital twin. The first prototype reconstructs a space-air-sea-ground communication network around a 5G communication tower from the supplied infographic: tower steel structure, AAU antenna units, GPS/BeiDou timing antenna, eCPRI fronthaul, DU/CU cabinet, power and grounding routes, backhaul, edge data center, and 5GC cloud relationship.
 
 ## Source Understanding
 
@@ -27,6 +27,10 @@ Applied to the provided 5G tower image, the workflow is:
 3. Render the scene with Three.js primitives and semantic layers rather than flattening the picture into a texture.
 4. Review the model through UI layer toggles and the Object Spec panel.
 5. Run `npm.cmd test` to validate required components, required connections, and README/UI integration.
+
+## Multi-Domain Extension
+
+The scene now extends the single-tower experiment into a space-air-sea-ground communication chain: transmitter and receiver terminals, a maritime communication ship, a shipboard gateway, a LEO satellite, and satellite/radio relay beams are modeled as additional procedural Three.js components.
 
 ## Prototype Features
 
