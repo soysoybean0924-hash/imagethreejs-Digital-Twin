@@ -45,6 +45,8 @@ npm.cmd run start
 
 Open `http://localhost:5173`.
 
+Chinese standalone version: `http://localhost:5173/index.zh.html`.
+
 The app imports Three.js from a CDN at runtime. For offline research use, vendor the Three.js module locally in a future iteration.
 
 ## Test

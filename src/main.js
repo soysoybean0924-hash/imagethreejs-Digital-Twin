@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.166.1/examples/jsm/controls/OrbitControls.js";
-import { getLayerConfig, getTowerSpec, summarizeSpec } from "./towerSpec.js";
+import { getComponentDisplay, getLayerConfig, getSceneLabel, getTowerSpec, summarizeSpec } from "./towerSpec.js";
 
 const canvas = document.querySelector("#scene");
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
@@ -22,8 +22,9 @@ controls.maxPolarAngle = Math.PI * 0.49;
 controls.minDistance = 10;
 controls.maxDistance = 42;
 
+const locale = document.documentElement.lang;
 const towerSpec = getTowerSpec();
-const specSummary = summarizeSpec();
+const specSummary = summarizeSpec(locale);
 
 const layers = {
   fronthaul: new THREE.Group(),
@@ -150,7 +151,7 @@ function buildTower() {
 
   tower.add(cylinderBetween(new THREE.Vector3(0, height - 0.2, 0), new THREE.Vector3(0, height + 3.2, 0), 0.1, mat.darkSteel, 18));
   scene.add(tower);
-  label("Steel lattice tower", [-3.7, 9.2, -2.4]);
+  label(getSceneLabel("tower-lattice", locale), [-3.7, 9.2, -2.4]);
 }
 
 function buildAntennas() {
@@ -181,8 +182,8 @@ function buildAntennas() {
   scene.add(timing);
 
   scene.add(cylinderBetween(new THREE.Vector3(-0.65, 18.1, -0.35), new THREE.Vector3(-0.65, 19.25, -0.35), 0.06, mat.darkSteel));
-  label("AAU / RU antenna array", [3.65, 15.2, -1.6]);
-  label("GPS / BeiDou timing", [-2.8, 18.1, 0.4]);
+  label(getSceneLabel("aau-array", locale), [3.65, 15.2, -1.6]);
+  label(getSceneLabel("gps-beidou-timing", locale), [-2.8, 18.1, 0.4]);
 }
 
 function buildCabinet() {
@@ -201,7 +202,8 @@ function buildCabinet() {
   doorR.rotation.y = 0.42;
   cabinet.add(doorR);
 
-  ["DU", "CU", "ODF", "Rectifier", "Battery", "EC"].forEach((name, i) => {
+  ["du", "cu", "odf", "rectifier", "battery", "ec"].forEach((moduleId, i) => {
+    const name = getSceneLabel(moduleId, locale);
     const y = 4.75 - i * 0.72;
     const unit = roundedBox(2.65, 0.52, 0.12, mat.module);
     unit.position.set(0, y, 1.58);
@@ -213,7 +215,7 @@ function buildCabinet() {
   });
 
   scene.add(cabinet);
-  label("Base equipment cabinet", [-3.25, 4.7, 2.3]);
+  label(getSceneLabel("equipment-cabinet", locale), [-3.25, 4.7, 2.3]);
 
   layers.power.add(cable([[0.85, 3.1, 1.45], [1.75, 2.4, 2.5], [4.8, 0.1, 3.2]], cableMaterials.dc, 0.055));
   layers.power.add(cable([[-0.85, 2.4, 1.45], [-1.8, 1.4, 2.7], [-5.2, 0.1, 3.4]], cableMaterials.ac, 0.055));
@@ -225,11 +227,11 @@ function buildExternalSystems() {
   const powerBox = roundedBox(1.7, 1.9, 1.35, mat.cabinet);
   powerBox.position.set(-5.2, 0.95, 2.65);
   scene.add(powerBox);
-  label("AC input", [-5.2, 2.45, 2.65]);
+  label(getSceneLabel("ac-input", locale), [-5.2, 2.45, 2.65]);
 
   const rod = cylinderBetween(new THREE.Vector3(3.8, -0.55, 4.6), new THREE.Vector3(3.8, 1.1, 4.6), 0.055, cableMaterials.ground);
   scene.add(rod);
-  label("Ground / SPD", [4.15, 1.55, 4.55], "#166534");
+  label(getSceneLabel("ground-spd", locale), [4.15, 1.55, 4.55], "#166534");
 
   const dataCenter = new THREE.Group();
   const base = roundedBox(3.1, 0.32, 2.2, mat.concrete);
@@ -244,7 +246,7 @@ function buildExternalSystems() {
     dataCenter.add(glow);
   }
   scene.add(dataCenter);
-  label("Edge data center / MEC", [6.2, 2.75, -2.9], "#075985");
+  label(getSceneLabel("edge-data-center", locale), [6.2, 2.75, -2.9], "#075985");
 
   layers.backhaul.add(cable([[0.65, 4.0, 1.45], [3.0, 4.8, 0.5], [6.2, 2.4, -2.9]], cableMaterials.backhaul, 0.045));
 
@@ -257,7 +259,7 @@ function buildExternalSystems() {
   cloudGroup.position.set(8.2, 5.2, -4.2);
   scene.add(cloudGroup);
   layers.backhaul.add(cable([[6.9, 2.2, -2.9], [7.4, 3.8, -3.5], [8.2, 5.0, -4.2]], cableMaterials.backhaul, 0.035));
-  label("5GC core cloud", [8.2, 6.2, -4.1], "#0369a1");
+  label(getSceneLabel("5gc-cloud", locale), [8.2, 6.2, -4.1], "#0369a1");
 }
 
 function buildLights() {
@@ -281,7 +283,7 @@ function buildLights() {
 
 function setupToggles() {
   const toggleRoot = document.querySelector("#layerToggles");
-  getLayerConfig().forEach(([key, labelText]) => {
+  getLayerConfig(locale).forEach(([key, labelText]) => {
     const button = document.createElement("button");
     button.className = "layer-toggle active";
     button.type = "button";
@@ -300,13 +302,16 @@ function populateSpecPanel() {
   if (!statsRoot || !componentRoot) return;
 
   statsRoot.innerHTML = [
-    "<span>" + specSummary.componentCount + " components</span>",
-    "<span>" + specSummary.connectionCount + " connections</span>",
-    "<span>" + specSummary.requiredLayerCount + " review layers</span>",
+    "<span>" + specSummary.componentCount + " " + specSummary.labels.components + "</span>",
+    "<span>" + specSummary.connectionCount + " " + specSummary.labels.connections + "</span>",
+    "<span>" + specSummary.requiredLayerCount + " " + specSummary.labels.reviewLayers + "</span>",
   ].join("");
 
   componentRoot.innerHTML = towerSpec.components
-    .map((component) => "<li><strong>" + component.label + "</strong><span>" + component.role + "</span></li>")
+    .map((component) => {
+      const display = getComponentDisplay(component, locale);
+      return "<li><strong>" + display.label + "</strong><span>" + display.role + "</span></li>";
+    })
     .join("");
 }
 function resize() {
