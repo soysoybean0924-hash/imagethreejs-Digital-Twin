@@ -330,3 +330,29 @@ h2 {
   color: #667085;
   font-size: 0.78rem;
 }
+
+.model-selector {
+  display: grid;
+  gap: 8px;
+}
+
+.model-button {
+  display: block;
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 11px;
+  color: #344054;
+  text-align: left;
+  background: #f8fafc;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.model-button:hover,
+.model-button.active {
+  color: #101828;
+  background: #ffffff;
+  border-color: #2d9cdb;
+  box-shadow: inset 3px 0 0 #2d9cdb;
+}

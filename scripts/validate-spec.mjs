@@ -23,47 +23,66 @@ const index = fs.readFileSync(indexPath, "utf8");
 const zhIndex = fs.readFileSync(zhIndexPath, "utf8");
 const readme = fs.readFileSync(readmePath, "utf8");
 
-if (spec.components.length >= spec.qualityGate.minimumComponents) {
-  pass(`component count ${spec.components.length} >= ${spec.qualityGate.minimumComponents}`);
+if (Array.isArray(spec.models)) {
+  pass("spec declares independent models array");
 } else {
-  fail(`component count ${spec.components.length} is below ${spec.qualityGate.minimumComponents}`);
+  fail("spec must declare independent models array");
 }
 
-const componentIds = new Set(spec.components.map((component) => component.id));
-for (const id of spec.qualityGate.requiredComponents) {
-  componentIds.has(id) ? pass(`required component ${id}`) : fail(`missing required component ${id}`);
+const modelIds = new Set((spec.models || []).map((model) => model.id));
+for (const id of spec.qualityGate.requiredModels) {
+  modelIds.has(id) ? pass(`required independent model ${id}`) : fail(`missing independent model ${id}`);
 }
 
-const layerIds = new Set(spec.components.map((component) => component.layer));
-for (const layer of spec.qualityGate.requiredLayers) {
-  layerIds.has(layer) || main.includes(`${layer}: new THREE.Group()`) ? pass(`required layer ${layer}`) : fail(`missing required layer ${layer}`);
+for (const model of spec.models || []) {
+  if (model.components.length >= spec.qualityGate.minimumComponentsPerModel) {
+    pass(`${model.id} component count ${model.components.length} >= ${spec.qualityGate.minimumComponentsPerModel}`);
+  } else {
+    fail(`${model.id} component count ${model.components.length} is below ${spec.qualityGate.minimumComponentsPerModel}`);
+  }
+
+  if (model.layers.length >= 4) {
+    pass(`${model.id} has review layers`);
+  } else {
+    fail(`${model.id} needs at least four review layers`);
+  }
+
+  if (model.connections.length >= 3) {
+    pass(`${model.id} has semantic connections`);
+  } else {
+    fail(`${model.id} needs at least three semantic connections`);
+  }
 }
 
-const connectionLabels = new Set(spec.connections.map((connection) => connection.label));
-for (const label of spec.qualityGate.requiredConnections) {
-  connectionLabels.has(label) ? pass(`required connection ${label}`) : fail(`missing required connection ${label}`);
+for (const fnName of spec.qualityGate.requiredBuilderFunctions) {
+  main.includes(`function ${fnName}`) ? pass(`main defines ${fnName}`) : fail(`main missing ${fnName}`);
+}
+
+for (const modelName of spec.qualityGate.requiredModelNames) {
+  readme.includes(modelName) || index.includes(modelName)
+    ? pass(`documentation references ${modelName}`)
+    : fail(`documentation missing ${modelName}`);
+}
+
+for (const fileCheck of [
+  [main, "modelSelector", "main wires the independent model selector"],
+  [main, "renderModel", "main renders one selected model at a time"],
+  [main, "separate-models-1", "main uses separate-model cache version"],
+  [index, "Separate Reconstruction Set", "English UI exposes separate reconstruction set"],
+  [index, "modelSelector", "English UI exposes model selector"],
+  [zhIndex, "lang=\"zh-CN\"", "Chinese page declares zh-CN locale"],
+  [zhIndex, "index.zh.html", "Chinese page keeps a standalone marker"],
+  [zhIndex, "modelSelector", "Chinese UI exposes model selector"],
+  [readme, "four independent image2-to-3D", "README documents four independent image2-to-3D models"],
+  [readme, "img2threejs", "README documents img2threejs workflow"],
+]) {
+  fileCheck[0].includes(fileCheck[1]) ? pass(fileCheck[2]) : fail(fileCheck[2]);
 }
 
 if (index !== zhIndex) {
   pass("standalone Chinese page differs from English entry");
 } else {
   fail("standalone Chinese page should not duplicate the English entry exactly");
-}
-
-for (const fileCheck of [
-  [main, "towerSpec", "main imports the object spec"],
-  [main, "getSceneLabel", "main can localize scene labels"],
-  [main, "buildLeoSatellite", "main builds the LEO satellite"],
-  [main, "buildMaritimeShip", "main builds the maritime relay"],
-  [main, "buildRadioTerminals", "main builds transmitter and receiver terminals"],
-  [index, "Object Spec", "English UI exposes the object spec panel"],
-  [zhIndex, "lang=\"zh-CN\"", "Chinese page declares zh-CN locale"],
-  [zhIndex, "specStats", "Chinese UI exposes localized spec stats container"],
-  [zhIndex, "specComponents", "Chinese UI exposes localized spec component container"],
-  [zhIndex, "index.zh.html", "Chinese page keeps a standalone marker"],
-  [readme, "img2threejs", "README documents img2threejs workflow"],
-]) {
-  fileCheck[0].includes(fileCheck[1]) ? pass(fileCheck[2]) : fail(fileCheck[2]);
 }
 
 if (process.exitCode) {

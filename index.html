@@ -17,12 +17,16 @@
     <main class="app-shell">
       <aside class="panel left-panel" aria-label="Project overview">
         <div class="brand-block">
-          <span class="eyebrow">Image to Three.js Research</span>
-          <h1>Space-Sea 5G Digital Twin</h1>
+          <span class="eyebrow">Image2 to Three.js Research</span>
+          <h1>Separate Communication Object Twins</h1>
         </div>
         <p class="summary">
-          A browser-based 3D reconstruction of ground 5G equipment, transmitter and receiver terminals, a maritime communication ship, and a LEO satellite relay.
+          Four independent 2D-image-to-3D reconstructions: transmitter, receiver, maritime communication ship, and LEO satellite. Each model is generated and reviewed separately.
         </p>
+        <section>
+          <h2>Independent Models</h2>
+          <div class="model-selector" id="modelSelector"></div>
+        </section>
         <section>
           <h2>Scene Layers</h2>
           <div class="toggle-list" id="layerToggles"></div>
@@ -30,12 +34,11 @@
         <section>
           <h2>Color Legend</h2>
           <ul class="legend">
-            <li><span style="--swatch:#f2c94c"></span>eCPRI fronthaul fiber</li>
-            <li><span style="--swatch:#2d9cdb"></span>Backhaul / core link</li>
-            <li><span style="--swatch:#eb5757"></span>-48V DC power</li>
-            <li><span style="--swatch:#f2994a"></span>230V AC power</li>
-            <li><span style="--swatch:#27ae60"></span>Grounding system</li>
-            <li><span style="--swatch:#9b51e0"></span>Alarm / monitoring</li>
+            <li><span style="--swatch:#2d9cdb"></span>Signal / RF path</li>
+            <li><span style="--swatch:#f2994a"></span>Power path</li>
+            <li><span style="--swatch:#9b51e0"></span>Decoder / monitoring</li>
+            <li><span style="--swatch:#f8fafc"></span>Antenna beam</li>
+            <li><span style="--swatch:#14b8a6"></span>Maritime relay path</li>
           </ul>
         </section>
       </aside>
@@ -45,11 +48,11 @@
         <div class="hud">
           <div>
             <span class="hud-label">Current Model</span>
-            <strong>UE -> AAU/RU -> DU -> CU -> 5GC</strong>
+            <strong id="activeModelTitle">Transmitter image2-to-3D</strong>
           </div>
           <div>
-            <span class="hud-label">Interaction</span>
-            <strong>Drag rotate / Wheel zoom / Right-drag pan</strong>
+            <span class="hud-label">Signal Chain</span>
+            <strong id="activeModelChain">Baseband input -> RF rack -> antenna</strong>
           </div>
         </div>
       </section>
@@ -57,8 +60,8 @@
       <aside class="panel right-panel" aria-label="Research notes">
         <section>
           <h2>Image2 Interpretation</h2>
-          <p>
-            The img2threejs workflow is applied as a research pattern: read each reference image as a design brief, extract the cross-domain architecture, and rebuild the objects as reviewable Three.js geometry.
+          <p id="activeModelSummary">
+            Each supplied reference image is handled as its own design brief. The app extracts visible engineering parts and rebuilds one object at a time as reviewable Three.js geometry.
           </p>
         </section>
         <section>
@@ -67,27 +70,16 @@
           <ul class="spec-components" id="specComponents"></ul>
         </section>
         <section>
-          <h2>Component Map</h2>
+          <h2>Separate Reconstruction Set</h2>
           <ol class="component-list">
-            <li>GPS / BeiDou timing antenna</li>
-            <li>Active antenna units (AAU/RU)</li>
-            <li>eCPRI fronthaul fiber</li>
-            <li>Steel lattice tower</li>
-            <li>Base cabinet: DU, CU, ODF, power, battery, EC</li>
-            <li>AC input and -48V DC distribution</li>
-            <li>Grounding and surge protection</li>
-            <li>Backhaul to edge data center and 5GC</li>
-            <li>Transmitter and receiver terminals</li>
-            <li>Maritime communication ship and shipboard gateway</li>
-            <li>LEO satellite relay and payload antenna</li>
+            <li>Transmitter: cabinet, RF rack, feeder, power, antenna</li>
+            <li>Receiver: antenna, receiver rack, decoder, power, ventilation</li>
+            <li>Maritime ship: hull, bridge, mast, radar, gateway cabinet</li>
+            <li>LEO satellite: bus, solar arrays, payload, dish, Earth limb</li>
           </ol>
         </section>
-        <figure class="reference-card">
-          <img src="./assets/5g-tower-frameless-3d.png" alt="Frameless 3D 5G tower reference generated from the source infographic" />
-          <figcaption>Generated frameless 3D reference asset</figcaption>
-        </figure>
       </aside>
     </main>
-    <script type="module" src="./src/main.js?v=multidomain-1"></script>
+    <script type="module" src="./src/main.js?v=separate-models-1"></script>
   </body>
 </html>

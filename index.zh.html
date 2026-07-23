@@ -18,12 +18,16 @@
     <main class="app-shell">
       <aside class="panel left-panel" aria-label="&#x9879;&#x76ee;&#x6982;&#x89c8;">
         <div class="brand-block">
-          <span class="eyebrow">&#x56fe;&#x50cf;&#x5230; Three.js &#x7814;&#x7a76;</span>
-          <h1>&#x7a7a;&#x5929;&#x6d77;&#x5730; 5G &#x6570;&#x5b57;&#x5b6a;&#x751f;</h1>
+          <span class="eyebrow">Image2 &#x5230; Three.js &#x7814;&#x7a76;</span>
+          <h1>&#x72ec;&#x7acb;&#x901a;&#x4fe1;&#x5bf9;&#x8c61;&#x6570;&#x5b57;&#x5b6a;&#x751f;</h1>
         </div>
         <p class="summary">
-          &#x57fa;&#x4e8e;&#x591a;&#x5f20;&#x53c2;&#x8003;&#x56fe;&#x751f;&#x6210;&#x7684;&#x6d4f;&#x89c8;&#x5668; 3D &#x91cd;&#x5efa;&#xff0c;&#x628a;&#x5730;&#x9762; 5G &#x57fa;&#x7ad9;&#x3001;&#x53d1;&#x9001;&#x673a;&#x3001;&#x63a5;&#x6536;&#x673a;&#x3001;&#x6d77;&#x4e0a;&#x901a;&#x4fe1;&#x8239;&#x548c;&#x4f4e;&#x8f68;&#x536b;&#x661f;&#x7ec4;&#x6210;&#x4e00;&#x4e2a;&#x53ef;&#x4ea4;&#x4e92;&#x7684;&#x901a;&#x4fe1;&#x94fe;&#x8def;&#x573a;&#x666f;&#x3002;
+          &#x56db;&#x4e2a;&#x72ec;&#x7acb;&#x7684;&#x4e8c;&#x7ef4;&#x56fe;&#x8f6c; 3D &#x91cd;&#x5efa;&#xff1a;&#x53d1;&#x9001;&#x673a;&#x3001;&#x63a5;&#x6536;&#x673a;&#x3001;&#x6d77;&#x4e0a;&#x901a;&#x4fe1;&#x8239;&#x548c;&#x4f4e;&#x8f68;&#x536b;&#x661f;&#x3002;&#x6bcf;&#x4e2a;&#x6a21;&#x578b;&#x90fd;&#x5355;&#x72ec;&#x751f;&#x6210;&#x548c;&#x5ba1;&#x67e5;&#x3002;
         </p>
+        <section>
+          <h2>&#x72ec;&#x7acb;&#x6a21;&#x578b;</h2>
+          <div class="model-selector" id="modelSelector"></div>
+        </section>
         <section>
           <h2>&#x573a;&#x666f;&#x56fe;&#x5c42;</h2>
           <div class="toggle-list" id="layerToggles"></div>
@@ -31,12 +35,11 @@
         <section>
           <h2>&#x989c;&#x8272;&#x56fe;&#x4f8b;</h2>
           <ul class="legend">
-            <li><span style="--swatch:#f2c94c"></span>eCPRI &#x524d;&#x4f20;&#x5149;&#x7ea4;</li>
-            <li><span style="--swatch:#2d9cdb"></span>&#x56de;&#x4f20; / &#x6838;&#x5fc3;&#x7f51;&#x94fe;&#x8def;</li>
-            <li><span style="--swatch:#eb5757"></span>-48V &#x76f4;&#x6d41;&#x7535;&#x6e90;</li>
-            <li><span style="--swatch:#f2994a"></span>230V &#x4ea4;&#x6d41;&#x7535;&#x6e90;</li>
-            <li><span style="--swatch:#27ae60"></span>&#x63a5;&#x5730;&#x7cfb;&#x7edf;</li>
-            <li><span style="--swatch:#9b51e0"></span>&#x544a;&#x8b66; / &#x76d1;&#x63a7;</li>
+            <li><span style="--swatch:#2d9cdb"></span>&#x4fe1;&#x53f7; / &#x5c04;&#x9891;&#x8def;&#x5f84;</li>
+            <li><span style="--swatch:#f2994a"></span>&#x7535;&#x6e90;&#x8def;&#x5f84;</li>
+            <li><span style="--swatch:#9b51e0"></span>&#x89e3;&#x8c03; / &#x76d1;&#x6d4b;</li>
+            <li><span style="--swatch:#f8fafc"></span>&#x5929;&#x7ebf;&#x6ce2;&#x675f;</li>
+            <li><span style="--swatch:#14b8a6"></span>&#x6d77;&#x4e0a;&#x4e2d;&#x7ee7;&#x8def;&#x5f84;</li>
           </ul>
         </section>
       </aside>
@@ -46,11 +49,11 @@
         <div class="hud">
           <div>
             <span class="hud-label">&#x5f53;&#x524d;&#x6a21;&#x578b;</span>
-            <strong>UE -> AAU/RU -> DU -> CU -> 5GC</strong>
+            <strong id="activeModelTitle">&#x53d1;&#x9001;&#x673a;&#x4e8c;&#x7ef4;&#x56fe;&#x8f6c 3D</strong>
           </div>
           <div>
-            <span class="hud-label">&#x4ea4;&#x4e92;&#x65b9;&#x5f0f;</span>
-            <strong>&#x62d6;&#x62fd;&#x65cb;&#x8f6c; / &#x6eda;&#x8f6e;&#x7f29;&#x653e; / &#x53f3;&#x952e;&#x62d6;&#x62fd;&#x5e73;&#x79fb;</strong>
+            <span class="hud-label">&#x4fe1;&#x53f7;&#x94fe;&#x8def;</span>
+            <strong id="activeModelChain">&#x57fa;&#x5e26;&#x8f93;&#x5165; -> &#x5c04;&#x9891;&#x673a;&#x67b6; -> &#x5929;&#x7ebf;</strong>
           </div>
         </div>
       </section>
@@ -58,8 +61,8 @@
       <aside class="panel right-panel" aria-label="&#x7814;&#x7a76;&#x8bf4;&#x660e;">
         <section>
           <h2>Image2 &#x89e3;&#x8bfb;</h2>
-          <p>
-            &#x8fd9;&#x91cc;&#x91c7;&#x7528; img2threejs &#x5de5;&#x4f5c;&#x6d41;&#xff1a;&#x628a;&#x591a;&#x5f20;&#x53c2;&#x8003;&#x56fe;&#x5f53;&#x6210;&#x8bbe;&#x8ba1;&#x8bf4;&#x660e;&#xff0c;&#x63d0;&#x53d6;&#x7a7a;&#x5929;&#x6d77;&#x5730;&#x67b6;&#x6784;&#x4e0e;&#x5bf9;&#x8c61;&#xff0c;&#x518d;&#x7528;&#x53ef;&#x5ba1;&#x67e5;&#x7684; Three.js &#x51e0;&#x4f55;&#x4f53;&#x91cd;&#x5efa; 3D &#x573a;&#x666f;&#x3002;
+          <p id="activeModelSummary">
+            &#x6bcf;&#x5f20;&#x53c2;&#x8003;&#x56fe;&#x90fd;&#x4f5c;&#x4e3a;&#x4e00;&#x4e2a;&#x72ec;&#x7acb;&#x8bbe;&#x8ba1;&#x8bf4;&#x660e;&#x5904;&#x7406;&#xff0c;&#x63d0;&#x53d6;&#x53ef;&#x89c1;&#x5de5;&#x7a0b;&#x90e8;&#x4ef6;&#xff0c;&#x518d;&#x4e00;&#x4e2a;&#x5bf9;&#x8c61;&#x4e00;&#x4e2a;&#x5bf9;&#x8c61;&#x5730;&#x91cd;&#x5efa;&#x4e3a;&#x53ef;&#x5ba1;&#x67e5;&#x7684; Three.js &#x51e0;&#x4f55;&#x4f53;&#x3002;
           </p>
         </section>
         <section>
@@ -68,27 +71,16 @@
           <ul class="spec-components" id="specComponents"></ul>
         </section>
         <section>
-          <h2>&#x7ec4;&#x4ef6;&#x5730;&#x56fe;</h2>
+          <h2>&#x72ec;&#x7acb;&#x91cd;&#x5efa;&#x96c6;</h2>
           <ol class="component-list">
-            <li>GPS / &#x5317;&#x6597;&#x6388;&#x65f6;&#x5929;&#x7ebf;</li>
-            <li>&#x6709;&#x6e90;&#x5929;&#x7ebf;&#x5355;&#x5143; AAU/RU</li>
-            <li>eCPRI &#x524d;&#x4f20;&#x5149;&#x7ea4;</li>
-            <li>&#x94c1;&#x5854;&#x6841;&#x67b6;&#x7ed3;&#x6784;</li>
-            <li>&#x57fa;&#x7ad9;&#x673a;&#x67dc;&#xff1a;DU&#x3001;CU&#x3001;ODF&#x3001;&#x7535;&#x6e90;&#x3001;&#x7535;&#x6c60;&#x3001;EC</li>
-            <li>&#x4ea4;&#x6d41;&#x8f93;&#x5165;&#x4e0e; -48V &#x76f4;&#x6d41;&#x914d;&#x7535;</li>
-            <li>&#x63a5;&#x5730;&#x4e0e;&#x6d6a;&#x6d8c;&#x4fdd;&#x62a4;</li>
-            <li>&#x56de;&#x4f20;&#x5230;&#x8fb9;&#x7f18;&#x6570;&#x636e;&#x4e2d;&#x5fc3;&#x548c; 5GC</li>
-            <li>&#x53d1;&#x9001;&#x673a;&#x4e0e;&#x63a5;&#x6536;&#x673a;&#x7ec8;&#x7aef;</li>
-            <li>&#x6d77;&#x4e0a;&#x901a;&#x4fe1;&#x8239;&#x4e0e;&#x8239;&#x8f7d;&#x7f51;&#x5173;</li>
-            <li>&#x4f4e;&#x8f68;&#x536b;&#x661f;&#x4e2d;&#x7ee7;&#x4e0e;&#x8f7d;&#x8377;&#x5929;&#x7ebf;</li>
+            <li>&#x53d1;&#x9001;&#x673a;&#xff1a;&#x673a;&#x67dc;&#x3001;&#x5c04;&#x9891;&#x673a;&#x67b6;&#x3001;&#x9988;&#x7ebf;&#x3001;&#x7535;&#x6e90;&#x3001;&#x5929;&#x7ebf;</li>
+            <li>&#x63a5;&#x6536;&#x673a;&#xff1a;&#x5929;&#x7ebf;&#x3001;&#x63a5;&#x6536;&#x673a;&#x67b6;&#x3001;&#x89e3;&#x8c03;&#x5355;&#x5143;&#x3001;&#x7535;&#x6e90;&#x3001;&#x901a;&#x98ce;</li>
+            <li>&#x6d77;&#x4e0a;&#x901a;&#x4fe1;&#x8239;&#xff1a;&#x8239;&#x4f53;&#x3001;&#x9a7e;&#x9a76;&#x53f0;&#x3001;&#x6845;&#x6746;&#x3001;&#x96f7;&#x8fbe;&#x3001;&#x7f51;&#x5173;&#x673a;&#x67dc;</li>
+            <li>&#x4f4e;&#x8f68;&#x536b;&#x661f;&#xff1a;&#x4e3b;&#x4f53;&#x3001;&#x592a;&#x9633;&#x7ffc;&#x3001;&#x8f7d;&#x8377;&#x3001;&#x5929;&#x7ebf;&#x3001;&#x5730;&#x7403;&#x8fb9;&#x7f18;</li>
           </ol>
         </section>
-        <figure class="reference-card">
-          <img src="./assets/5g-tower-frameless-3d.png" alt="&#x7531;&#x6e90;&#x4fe1;&#x606f;&#x56fe;&#x751f;&#x6210;&#x7684;&#x65e0;&#x6846; 3D 5G &#x901a;&#x4fe1;&#x5854;&#x53c2;&#x8003;&#x56fe;" />
-          <figcaption>&#x7531;&#x6e90;&#x56fe;&#x751f;&#x6210;&#x7684;&#x65e0;&#x6846; 3D &#x53c2;&#x8003;&#x8d44;&#x4ea7;</figcaption>
-        </figure>
       </aside>
     </main>
-    <script type="module" src="./src/main.js?v=multidomain-1"></script>
+    <script type="module" src="./src/main.js?v=separate-models-1"></script>
   </body>
 </html>

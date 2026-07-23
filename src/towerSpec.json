@@ -1,317 +1,106 @@
 {
   "sourceProject": "hoainho/img2threejs-inspired workflow",
-  "sourceImage": "assets/5g-tower-frameless-3d.png",
-  "modelName": "Space-Air-Sea-Ground Communication Digital Twin",
+  "projectName": "Separate Image2-to-Three.js Communication Objects",
   "method": {
-    "intent": "Use multiple reference images as a design brief, then rebuild the 5G tower, receiver/transmitter equipment, maritime communication ship, and LEO satellite as structured Three.js geometry instead of treating the images as flat textures.",
+    "intent": "Treat each supplied 2D reference image as an independent design brief, then rebuild receiver, transmitter, maritime communication ship, and LEO satellite as separate inspectable Three.js objects instead of one combined scene.",
     "steps": [
-      "Read the images and isolate visible engineering objects across ground, maritime, and orbital communication domains.",
-      "Convert objects into named components with approximate scale, role, and connection semantics.",
-      "Create the model with procedural Three.js primitives and reusable factories.",
-      "Expose layers for technical review: fronthaul, backhaul, power, ground, monitoring, radio endpoints, maritime relay, and satellite links.",
-      "Run a quality gate that checks required components, connections, and UI references."
+      "Read one reference image at a time and isolate the dominant engineering object.",
+      "Convert the object into named components, review layers, and semantic connections.",
+      "Render each model as procedural Three.js geometry with its own scale, camera target, and labels.",
+      "Expose a model switcher so each image2-to-3D result can be reviewed independently.",
+      "Run a quality gate that checks all four independent reconstructions."
     ]
   },
   "qualityGate": {
-    "minimumComponents": 10,
-    "requiredLayers": [
-      "fronthaul",
-      "backhaul",
-      "power",
-      "ground",
-      "monitoring",
-      "radio",
-      "satellite",
-      "maritime"
-    ],
-    "requiredComponents": [
-      "tower-lattice",
-      "gps-beidou-timing",
-      "aau-array",
-      "ecpri-fronthaul",
-      "equipment-cabinet",
-      "du-module",
-      "cu-module",
-      "power-distribution",
-      "ground-spd",
-      "edge-data-center",
-      "5gc-cloud",
-      "transmitter-terminal",
-      "receiver-terminal",
-      "maritime-communication-ship",
-      "leo-satellite",
-      "shipboard-gateway",
-      "satellite-payload"
-    ],
-    "requiredConnections": [
-      "AAU/RU -> DU",
-      "DU -> CU",
-      "CU -> Edge Data Center",
-      "Edge Data Center -> 5GC",
-      "AC Input -> Rectifier",
-      "Cabinet -> Ground/SPD",
-      "Transmitter -> 5G Tower",
-      "5G Tower -> Receiver",
-      "Ship Gateway -> 5G Tower",
-      "LEO Satellite -> Ship Gateway",
-      "LEO Satellite -> Ground Receiver"
-    ]
+    "requiredModels": ["transmitter", "receiver", "ship", "satellite"],
+    "minimumComponentsPerModel": 4,
+    "requiredBuilderFunctions": ["buildTransmitterModel", "buildReceiverModel", "buildShipModel", "buildSatelliteModel"],
+    "requiredModelNames": ["Transmitter", "Receiver", "Maritime Communication Ship", "LEO Satellite"]
   },
-  "components": [
+  "models": [
     {
-      "id": "tower-lattice",
-      "label": "Steel lattice tower",
-      "role": "structural support",
-      "layer": "structure",
-      "approxPosition": [
-        0,
-        7.5,
-        0
+      "id": "transmitter",
+      "name": "Transmitter image2-to-3D",
+      "sourceImage": "user-supplied transmitter / cabinet reference",
+      "summary": "Independent 3D reconstruction of a transmitter cabinet with RF rack, feeder lines, power path, cooling vents, and directional antenna.",
+      "chain": "Baseband input -> RF power rack -> feeder -> directional antenna",
+      "layers": ["enclosure", "rf", "antenna", "power", "signal", "cooling"],
+      "components": [
+        { "id": "transmitter-terminal", "label": "Transmitter terminal cabinet", "role": "equipment enclosure and uplink source", "layer": "enclosure" },
+        { "id": "tx-rf-rack", "label": "RF power rack", "role": "amplification, filtering, and RF monitoring", "layer": "rf" },
+        { "id": "tx-antenna", "label": "Directional transmit antenna", "role": "radiates the uplink signal", "layer": "antenna" },
+        { "id": "tx-feeder", "label": "Uplink feeder bundle", "role": "connects rack output to antenna", "layer": "signal" },
+        { "id": "tx-power", "label": "Power distribution shelf", "role": "AC/DC conversion and protected distribution", "layer": "power" },
+        { "id": "tx-cooling", "label": "Cooling vent stack", "role": "airflow for RF power modules", "layer": "cooling" }
+      ],
+      "connections": [
+        { "id": "tx-rack-feeder", "label": "RF rack -> feeder", "kind": "signal", "color": "#2d9cdb" },
+        { "id": "tx-feeder-antenna", "label": "feeder -> transmit antenna", "kind": "signal", "color": "#2d9cdb" },
+        { "id": "tx-power-rack", "label": "power shelf -> RF rack", "kind": "power", "color": "#f2994a" }
       ]
     },
     {
-      "id": "gps-beidou-timing",
-      "label": "GPS / BeiDou timing antenna",
-      "role": "clock synchronization",
-      "layer": "timing",
-      "approxPosition": [
-        -0.65,
-        18.6,
-        -0.35
+      "id": "receiver",
+      "name": "Receiver image2-to-3D",
+      "sourceImage": "user-supplied receiver / open cabinet reference",
+      "summary": "Independent 3D reconstruction of a receiver terminal with receiving antenna, low-noise RF chain, rack modules, decoder, power shelf, and monitoring indicators.",
+      "chain": "receiving antenna -> low-noise chain -> receiver rack -> decoder output",
+      "layers": ["enclosure", "antenna", "rf", "signal", "power", "cooling"],
+      "components": [
+        { "id": "receiver-terminal", "label": "Receiver terminal cabinet", "role": "protected receiving equipment enclosure", "layer": "enclosure" },
+        { "id": "rx-antenna", "label": "Receiving antenna", "role": "captures incoming radio signal", "layer": "antenna" },
+        { "id": "rx-rack", "label": "Receiver rack", "role": "filtering, gain control, and monitoring", "layer": "rf" },
+        { "id": "rx-decoder", "label": "Signal decoder", "role": "converts RF/IF signal into data output", "layer": "signal" },
+        { "id": "rx-power", "label": "Protected power shelf", "role": "feeds receiver modules", "layer": "power" },
+        { "id": "rx-vent", "label": "Door ventilation", "role": "thermal exhaust path", "layer": "cooling" }
+      ],
+      "connections": [
+        { "id": "rx-antenna-rack", "label": "receiving antenna -> receiver rack", "kind": "signal", "color": "#2d9cdb" },
+        { "id": "rx-rack-decoder", "label": "receiver rack -> decoder", "kind": "signal", "color": "#9b51e0" },
+        { "id": "rx-power-rack", "label": "power shelf -> receiver rack", "kind": "power", "color": "#f2994a" }
       ]
     },
     {
-      "id": "aau-array",
-      "label": "AAU / RU antenna array",
-      "role": "radio access and beamforming",
-      "layer": "radio",
-      "approxPosition": [
-        0,
-        15,
-        0
+      "id": "ship",
+      "name": "Maritime Communication Ship image2-to-3D",
+      "sourceImage": "user-supplied maritime communication ship reference",
+      "summary": "Independent 3D reconstruction of a communication vessel with hull, bridge, mast, radar, satellite dish, exposed equipment bay, colored cables, and ocean reference plane.",
+      "chain": "shipboard gateway -> mast antennas -> satellite / shore link",
+      "layers": ["hull", "deck", "mast", "antenna", "rf", "signal", "power"],
+      "components": [
+        { "id": "ship-hull", "label": "Communication vessel hull", "role": "sea platform carrying communications equipment", "layer": "hull" },
+        { "id": "ship-mast", "label": "Integrated communication mast", "role": "mounts antennas, radar, and relay equipment", "layer": "mast" },
+        { "id": "ship-radar", "label": "Maritime radar and satellite dish", "role": "navigation and long-range communication", "layer": "antenna" },
+        { "id": "ship-gateway", "label": "Shipboard gateway cabinet", "role": "routing, RF processing, and power distribution", "layer": "rf" },
+        { "id": "ship-cable-bay", "label": "Exposed cable bay", "role": "visible signal and power harnesses", "layer": "signal" },
+        { "id": "ship-bridge", "label": "Bridge and deckhouse", "role": "command deck below the antenna mast", "layer": "deck" }
+      ],
+      "connections": [
+        { "id": "ship-gateway-mast", "label": "gateway -> mast antennas", "kind": "signal", "color": "#14b8a6" },
+        { "id": "ship-power-gateway", "label": "ship power -> gateway", "kind": "power", "color": "#f2994a" },
+        { "id": "ship-dish-space", "label": "satellite dish -> space link", "kind": "antenna", "color": "#f8fafc" }
       ]
     },
     {
-      "id": "ecpri-fronthaul",
-      "label": "eCPRI fronthaul fibers",
-      "role": "low-latency AAU to DU transport",
-      "layer": "fronthaul",
-      "approxPosition": [
-        0.1,
-        10,
-        0.2
+      "id": "satellite",
+      "name": "LEO Satellite image2-to-3D",
+      "sourceImage": "user-supplied LEO satellite reference",
+      "summary": "Independent 3D reconstruction of a low-Earth-orbit communication satellite with bus, solar wings, payload boxes, parabolic antenna, harnesses, and Earth limb reference.",
+      "chain": "solar arrays -> satellite bus -> payload processor -> directional antenna",
+      "layers": ["satellite", "solar", "payload", "antenna", "signal", "orbit"],
+      "components": [
+        { "id": "sat-bus", "label": "Satellite bus", "role": "structural, attitude, power, and thermal platform", "layer": "satellite" },
+        { "id": "sat-solar", "label": "Solar array wings", "role": "power generation for LEO operations", "layer": "solar" },
+        { "id": "sat-payload", "label": "Communication payload modules", "role": "transponder, beam control, and channel processing", "layer": "payload" },
+        { "id": "sat-dish", "label": "Payload antenna", "role": "directional link toward ground or maritime users", "layer": "antenna" },
+        { "id": "sat-harness", "label": "External harnesses", "role": "power and signal routes across satellite panels", "layer": "signal" },
+        { "id": "earth-limb", "label": "Earth limb reference", "role": "orbit context for the reconstructed spacecraft", "layer": "orbit" }
+      ],
+      "connections": [
+        { "id": "sat-solar-bus", "label": "solar arrays -> bus", "kind": "power", "color": "#f2c94c" },
+        { "id": "sat-bus-payload", "label": "bus -> payload", "kind": "signal", "color": "#2d9cdb" },
+        { "id": "sat-payload-dish", "label": "payload -> directional antenna", "kind": "antenna", "color": "#f8fafc" }
       ]
-    },
-    {
-      "id": "equipment-cabinet",
-      "label": "Base equipment cabinet",
-      "role": "site equipment enclosure",
-      "layer": "cabinet",
-      "approxPosition": [
-        0,
-        2.5,
-        2.3
-      ]
-    },
-    {
-      "id": "du-module",
-      "label": "DU module",
-      "role": "distributed unit lower-layer processing",
-      "layer": "cabinet",
-      "approxPosition": [
-        0,
-        4.75,
-        1.58
-      ]
-    },
-    {
-      "id": "cu-module",
-      "label": "CU module",
-      "role": "centralized unit control/user-plane handling",
-      "layer": "cabinet",
-      "approxPosition": [
-        0,
-        4.03,
-        1.58
-      ]
-    },
-    {
-      "id": "power-distribution",
-      "label": "AC and -48V DC power",
-      "role": "power conversion and distribution",
-      "layer": "power",
-      "approxPosition": [
-        -2,
-        1.5,
-        2.8
-      ]
-    },
-    {
-      "id": "ground-spd",
-      "label": "Grounding and surge protection",
-      "role": "safety and lightning protection",
-      "layer": "ground",
-      "approxPosition": [
-        3.8,
-        0.5,
-        4.6
-      ]
-    },
-    {
-      "id": "edge-data-center",
-      "label": "Edge data center / MEC",
-      "role": "local compute and transport aggregation",
-      "layer": "backhaul",
-      "approxPosition": [
-        6.2,
-        1.2,
-        -2.9
-      ]
-    },
-    {
-      "id": "5gc-cloud",
-      "label": "5GC core cloud",
-      "role": "core network services",
-      "layer": "backhaul",
-      "approxPosition": [
-        8.2,
-        5.2,
-        -4.2
-      ]
-    },
-    {
-      "id": "transmitter-terminal",
-      "label": "Transmitter terminal",
-      "role": "uplink source and signal injection point",
-      "layer": "radio",
-      "approxPosition": [
-        -7.5,
-        1.2,
-        -1.8
-      ]
-    },
-    {
-      "id": "receiver-terminal",
-      "label": "Receiver terminal",
-      "role": "downlink receiver and service endpoint",
-      "layer": "radio",
-      "approxPosition": [
-        7.4,
-        1.2,
-        2.6
-      ]
-    },
-    {
-      "id": "maritime-communication-ship",
-      "label": "Maritime communication ship",
-      "role": "sea-based relay platform with mast, radar, and onboard equipment bay",
-      "layer": "maritime",
-      "approxPosition": [
-        -8.8,
-        1.2,
-        -6.2
-      ]
-    },
-    {
-      "id": "shipboard-gateway",
-      "label": "Shipboard gateway cabinet",
-      "role": "ship radio, routing, and power gateway",
-      "layer": "maritime",
-      "approxPosition": [
-        -7.9,
-        1.9,
-        -5.6
-      ]
-    },
-    {
-      "id": "leo-satellite",
-      "label": "LEO communication satellite",
-      "role": "orbital relay with solar arrays and directional payload antenna",
-      "layer": "satellite",
-      "approxPosition": [
-        5.6,
-        18.2,
-        -7.6
-      ]
-    },
-    {
-      "id": "satellite-payload",
-      "label": "Satellite payload module",
-      "role": "spaceborne transponder and phased communication payload",
-      "layer": "satellite",
-      "approxPosition": [
-        5.6,
-        18.2,
-        -7.6
-      ]
-    }
-  ],
-  "connections": [
-    {
-      "id": "aauru-du",
-      "label": "AAU/RU -> DU",
-      "kind": "fronthaul",
-      "color": "#f2c94c"
-    },
-    {
-      "id": "du-cu",
-      "label": "DU -> CU",
-      "kind": "internal-cabinet",
-      "color": "#7fc8ff"
-    },
-    {
-      "id": "cu-edge",
-      "label": "CU -> Edge Data Center",
-      "kind": "backhaul",
-      "color": "#2d9cdb"
-    },
-    {
-      "id": "edge-5gc",
-      "label": "Edge Data Center -> 5GC",
-      "kind": "core",
-      "color": "#2d9cdb"
-    },
-    {
-      "id": "ac-rectifier",
-      "label": "AC Input -> Rectifier",
-      "kind": "power",
-      "color": "#f2994a"
-    },
-    {
-      "id": "cabinet-ground",
-      "label": "Cabinet -> Ground/SPD",
-      "kind": "ground",
-      "color": "#27ae60"
-    },
-    {
-      "id": "tx-tower",
-      "label": "Transmitter -> 5G Tower",
-      "kind": "radio",
-      "color": "#00b7ff"
-    },
-    {
-      "id": "tower-rx",
-      "label": "5G Tower -> Receiver",
-      "kind": "radio",
-      "color": "#00b7ff"
-    },
-    {
-      "id": "ship-tower",
-      "label": "Ship Gateway -> 5G Tower",
-      "kind": "maritime",
-      "color": "#14b8a6"
-    },
-    {
-      "id": "leo-ship",
-      "label": "LEO Satellite -> Ship Gateway",
-      "kind": "satellite",
-      "color": "#f8fafc"
-    },
-    {
-      "id": "leo-rx",
-      "label": "LEO Satellite -> Ground Receiver",
-      "kind": "satellite",
-      "color": "#f8fafc"
     }
   ]
 }

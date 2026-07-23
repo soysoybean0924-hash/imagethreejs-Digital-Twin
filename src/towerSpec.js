@@ -1,27 +1,32 @@
 import spec from "./towerSpec.json" with { type: "json" };
-import { getText, resolveLocale } from "./i18n.js?v=multidomain-1";
+import { getText, resolveLocale } from "./i18n.js?v=separate-models-1";
 
-export function getTowerSpec() {
+export function getProjectSpec() {
   return spec;
 }
 
-export function getLayerConfig(locale = "en") {
+export function getModels() {
+  return spec.models;
+}
+
+export function getModel(id) {
+  return spec.models.find((model) => model.id === id) || spec.models[0];
+}
+
+export function getLayerConfig(modelId, locale = "en") {
   const labels = getText(locale).layerLabels;
-  return [
-    ["fronthaul", labels.fronthaul],
-    ["backhaul", labels.backhaul],
-    ["power", labels.power],
-    ["ground", labels.ground],
-    ["monitoring", labels.monitoring],
-    ["radio", labels.radio],
-    ["satellite", labels.satellite],
-    ["maritime", labels.maritime],
-  ];
+  return getModel(modelId).layers.map((layer) => [layer, labels[layer] || layer]);
 }
 
 export function getSceneLabel(id, locale = "en") {
   const text = getText(locale);
   return text.sceneLabels[id] || id;
+}
+
+export function getModelDisplay(model, locale = "en") {
+  const key = resolveLocale(locale);
+  const override = getText(key).modelOverrides?.[model.id];
+  return override || { name: model.name, summary: model.summary, chain: model.chain };
 }
 
 export function getComponentDisplay(component, locale = "en") {
@@ -30,11 +35,12 @@ export function getComponentDisplay(component, locale = "en") {
   return override || { label: component.label, role: component.role };
 }
 
-export function summarizeSpec(locale = "en") {
+export function summarizeModel(modelId, locale = "en") {
+  const model = getModel(modelId);
   return {
-    componentCount: spec.components.length,
-    connectionCount: spec.connections.length,
-    requiredLayerCount: spec.qualityGate.requiredLayers.length,
+    componentCount: model.components.length,
+    connectionCount: model.connections.length,
+    layerCount: model.layers.length,
     labels: getText(locale).statLabels,
   };
 }
