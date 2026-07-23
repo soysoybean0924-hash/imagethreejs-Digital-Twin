@@ -1,0 +1,19 @@
+{
+  "name": "imagethreejs-digital-twin",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Image-to-Three.js 5G communication tower digital twin research prototype.",
+  "scripts": {
+    "start": "python -m http.server 5173",
+    "serve": "python -m http.server 5173"
+  },
+  "keywords": [
+    "threejs",
+    "digital-twin",
+    "image-to-3d",
+    "5g",
+    "telecom"
+  ],
+  "license": "MIT"
+}

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>imagethreejs-Digital-Twin</title>
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="panel left-panel" aria-label="Project overview">
+        <div class="brand-block">
+          <span class="eyebrow">Image to Three.js Research</span>
+          <h1>5G Tower Digital Twin</h1>
+        </div>
+        <p class="summary">
+          A browser-based 3D reconstruction of the supplied 5G communication tower diagram, converted from framed infographic into an interactive digital twin.
+        </p>
+        <section>
+          <h2>Scene Layers</h2>
+          <div class="toggle-list" id="layerToggles"></div>
+        </section>
+        <section>
+          <h2>Color Legend</h2>
+          <ul class="legend">
+            <li><span style="--swatch:#f2c94c"></span>eCPRI fronthaul fiber</li>
+            <li><span style="--swatch:#2d9cdb"></span>Backhaul / core link</li>
+            <li><span style="--swatch:#eb5757"></span>-48V DC power</li>
+            <li><span style="--swatch:#f2994a"></span>230V AC power</li>
+            <li><span style="--swatch:#27ae60"></span>Grounding system</li>
+            <li><span style="--swatch:#9b51e0"></span>Alarm / monitoring</li>
+          </ul>
+        </section>
+      </aside>
+
+      <section class="viewport-wrap" aria-label="Three.js digital twin viewport">
+        <canvas id="scene"></canvas>
+        <div class="hud">
+          <div>
+            <span class="hud-label">Current Model</span>
+            <strong>UE -> AAU/RU -> DU -> CU -> 5GC</strong>
+          </div>
+          <div>
+            <span class="hud-label">Interaction</span>
+            <strong>Drag rotate · Wheel zoom · Right-drag pan</strong>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel right-panel" aria-label="Research notes">
+        <section>
+          <h2>Image2 Interpretation</h2>
+          <p>
+            The linked workflow is applied as a research pattern: understand the source image, extract the architecture, remove poster frames, and rebuild the object as a navigable 3D scene.
+          </p>
+        </section>
+        <section>
+          <h2>Component Map</h2>
+          <ol class="component-list">
+            <li>GPS / BeiDou timing antenna</li>
+            <li>Active antenna units (AAU/RU)</li>
+            <li>eCPRI fronthaul fiber</li>
+            <li>Steel lattice tower</li>
+            <li>Base cabinet: DU, CU, ODF, power, battery, EC</li>
+            <li>AC input and -48V DC distribution</li>
+            <li>Grounding and surge protection</li>
+            <li>Backhaul to edge data center and 5GC</li>
+          </ol>
+        </section>
+        <figure class="reference-card">
+          <img src="./assets/5g-tower-frameless-3d.png" alt="Frameless 3D 5G tower reference generated from the source infographic" />
+          <figcaption>Generated frameless 3D reference asset</figcaption>
+        </figure>
+      </aside>
+    </main>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
