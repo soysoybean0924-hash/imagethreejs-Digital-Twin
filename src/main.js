@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.166.1/examples/jsm/controls/OrbitControls.js";
-import { getComponentDisplay, getLayerConfig, getModel, getModelDisplay, getModels, getSceneLabel, summarizeModel } from "./towerSpec.js?v=ship-reference-3";
+import { getComponentDisplay, getLayerConfig, getModel, getModelDisplay, getModels, getSceneLabel, summarizeModel } from "./towerSpec.js?v=network-scene-1";
 
 const canvas = document.querySelector("#scene");
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
@@ -26,8 +26,47 @@ const modelRoot = new THREE.Group();
 const labelRoot = new THREE.Group();
 scene.add(modelRoot, labelRoot);
 
-let activeModelId = new URLSearchParams(window.location.search).get("model") || "transmitter";
+const params = new URLSearchParams(window.location.search);
+let activeModelId = params.get("scene") === "maritime-network" ? "network" : params.get("model") || "transmitter";
 let activeLayers = {};
+
+const networkScene = {
+  id: "network",
+  query: "maritime-network",
+  layers: ["sea", "terrain", "assets", "space", "links", "signal", "power"],
+  display: {
+    en: {
+      name: "Maritime-Space Communication Scene",
+      summary: "A reusable scene composition that places the ship, LEO satellite, shore tower, transmitter, receiver, and data center into one digital-twin network.",
+      chain: "ship gateway -> satellite -> shore tower -> receiver / data center",
+      stats: ["6 assets", "5 links", "7 scene layers"],
+    },
+    zh: {
+      name: "海陆空通信网络综合场景",
+      summary: "把海上通信船、低轨卫星、岸基通信塔、发送机、接收机和数据中心放进同一个可编排数字孪生场景。",
+      chain: "船载网关 -> 低轨卫星 -> 岸基通信塔 -> 接收机 / 数据中心",
+      stats: ["6 个资产", "5 条链路", "7 个场景图层"],
+    },
+  },
+  components: {
+    en: [
+      ["Maritime communication ship", "mobile sea relay and shipboard gateway"],
+      ["LEO satellite", "space relay asset for wide-area coverage"],
+      ["Shore 5G tower", "terrestrial access and backhaul anchor"],
+      ["Transmitter terminal", "uplink source object placed on shore"],
+      ["Receiver terminal", "downlink endpoint object placed near the tower"],
+      ["Edge data center", "service endpoint for command, storage, and AI processing"],
+    ],
+    zh: [
+      ["海上通信船", "海上移动中继与船载网关"],
+      ["低轨卫星", "提供广域覆盖的空间中继资产"],
+      ["岸基 5G 通信塔", "地面接入与回传锚点"],
+      ["发送机终端", "布置在岸侧的上行信号源"],
+      ["接收机终端", "布置在通信塔附近的下行端点"],
+      ["边缘数据中心", "指挥、存储和 AI 处理服务端点"],
+    ],
+  },
+};
 
 const mat = {
   cabinet: new THREE.MeshStandardMaterial({ color: 0xdfe5eb, metalness: 0.34, roughness: 0.32 }),
@@ -109,6 +148,20 @@ function addLabel(text, position, color = "#1e293b") {
   sprite.scale.set(2.7, 0.68, 1);
   labelRoot.add(sprite);
   return sprite;
+}
+
+function addGroundGrid(layer, width, depth, y, color) {
+  const geometry = new THREE.BufferGeometry();
+  const points = [];
+  for (let x = -width / 2; x <= width / 2; x += 2) {
+    points.push(x, y, -depth / 2, x, y, depth / 2);
+  }
+  for (let z = -depth / 2; z <= depth / 2; z += 2) {
+    points.push(-width / 2, y, z, width / 2, y, z);
+  }
+  geometry.setAttribute("position", new THREE.Float32BufferAttribute(points, 3));
+  const material = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.35 });
+  addToLayer(layer, new THREE.LineSegments(geometry, material));
 }
 
 function buildDish(position, rotation, scale = 1) {
@@ -453,7 +506,142 @@ function buildSatelliteModel() {
   camera.position.set(7.8, 6.7, 9.8);
   controls.target.set(0, 2.35, 0);
 }
+
+function buildMiniTower(x, z, scale = 1) {
+  const group = new THREE.Group();
+  const legs = [
+    [-0.45, -0.45],
+    [0.45, -0.45],
+    [-0.32, 0.45],
+    [0.32, 0.45],
+  ];
+  legs.forEach(([lx, lz]) => {
+    group.add(cylinderBetween(new THREE.Vector3(lx * scale, 0, lz * scale), new THREE.Vector3(lx * 0.55 * scale, 6.4 * scale, lz * 0.55 * scale), 0.035 * scale, mat.darkSteel, 8));
+  });
+  for (let y = 0.8; y < 6.2; y += 0.65) {
+    group.add(cylinderBetween(new THREE.Vector3(-0.42 * scale, y * scale, -0.42 * scale), new THREE.Vector3(0.42 * scale, (y + 0.42) * scale, 0.42 * scale), 0.016 * scale, mat.steel, 8));
+    group.add(cylinderBetween(new THREE.Vector3(-0.42 * scale, y * scale, 0.42 * scale), new THREE.Vector3(0.42 * scale, (y + 0.42) * scale, -0.42 * scale), 0.016 * scale, mat.steel, 8));
+  }
+  [-0.85, 0.85].forEach((lx) => {
+    const panel = roundedBox(0.32 * scale, 1.45 * scale, 0.14 * scale, mat.whitePanel);
+    panel.position.set(lx * scale, 5.25 * scale, 0);
+    group.add(panel);
+  });
+  const top = new THREE.Mesh(new THREE.SphereGeometry(0.28 * scale, 24, 12), mat.antenna);
+  top.scale.y = 0.72;
+  top.position.set(0, 6.85 * scale, 0);
+  group.add(top);
+  group.position.set(x, 0, z);
+  return group;
+}
+
+function buildMiniCabinet(label, x, z, scale = 1) {
+  const group = new THREE.Group();
+  const body = roundedBox(1.35 * scale, 2.05 * scale, 0.78 * scale, mat.cabinet);
+  body.position.set(0, 1.02 * scale, 0);
+  group.add(body);
+  for (let i = 0; i < 4; i += 1) {
+    const unit = roundedBox(0.96 * scale, 0.24 * scale, 0.08 * scale, mat.module);
+    unit.position.set(0, (1.72 - i * 0.34) * scale, -0.43 * scale);
+    group.add(unit);
+  }
+  const antenna = roundedBox(0.46 * scale, 0.88 * scale, 0.16 * scale, mat.whitePanel);
+  antenna.position.set(-0.95 * scale, 2.55 * scale, 0);
+  group.add(antenna);
+  group.add(cylinderBetween(new THREE.Vector3(-0.95 * scale, 0.8 * scale, 0), new THREE.Vector3(-0.95 * scale, 2.15 * scale, 0), 0.025 * scale, mat.darkSteel, 8));
+  group.position.set(x, 0, z);
+  addLabel(label, [x, 2.95 * scale, z], "#075985");
+  return group;
+}
+
+function buildMiniShipAsset(x, z, scale = 0.6) {
+  const group = new THREE.Group();
+  const hull = roundedBox(6.6 * scale, 0.62 * scale, 1.1 * scale, mat.hull);
+  hull.position.set(0, 0.42 * scale, 0);
+  group.add(hull);
+  const deck = roundedBox(5.7 * scale, 0.18 * scale, 0.92 * scale, mat.whitePanel);
+  deck.position.set(-0.15 * scale, 0.86 * scale, 0);
+  group.add(deck);
+  const bridge = roundedBox(1.65 * scale, 0.86 * scale, 0.72 * scale, mat.whitePanel);
+  bridge.position.set(-1.95 * scale, 1.35 * scale, 0);
+  group.add(bridge);
+  const mast = buildMiniTower(0, 0, 0.48 * scale);
+  mast.position.set(0.4 * scale, 0.88 * scale, 0.05 * scale);
+  group.add(mast);
+  group.add(buildDish([2.2 * scale, 2.05 * scale, 0.2 * scale], [0.05, -1.0, 0.02], 0.52 * scale));
+  group.position.set(x, 0.02, z);
+  return group;
+}
+
+function buildMiniSatelliteAsset(x, y, z, scale = 0.72) {
+  const group = new THREE.Group();
+  const bus = roundedBox(1.05 * scale, 1.2 * scale, 0.86 * scale, mat.cabinet);
+  group.add(bus);
+  [-1.7, 1.7].forEach((sx) => {
+    const panel = roundedBox(1.55 * scale, 0.72 * scale, 0.05 * scale, mat.solar);
+    panel.position.set(sx * scale, 0, 0);
+    group.add(panel);
+  });
+  group.add(buildDish([0, 0.98 * scale, -0.3 * scale], [-0.45, 0, 0], 0.42 * scale));
+  group.position.set(x, y, z);
+  group.rotation.y = -0.35;
+  return group;
+}
+
+function buildDataCenter(x, z) {
+  const group = new THREE.Group();
+  const slab = roundedBox(3.2, 0.16, 2.0, mat.concrete);
+  slab.position.set(0, 0.08, 0);
+  group.add(slab);
+  for (let i = 0; i < 4; i += 1) {
+    const rack = roundedBox(0.42, 1.18, 0.62, mat.module);
+    rack.position.set(-0.9 + i * 0.6, 0.76, 0);
+    group.add(rack);
+    const light = roundedBox(0.08, 0.08, 0.04, i % 2 ? mat.green : mat.blue);
+    light.position.set(-0.9 + i * 0.6, 1.06, -0.33);
+    group.add(light);
+  }
+  group.position.set(x, 0, z);
+  return group;
+}
+
+function buildNetworkScene() {
+  const isZh = locale.startsWith("zh");
+  const ocean = roundedBox(18, 0.08, 10.5, mat.ocean);
+  ocean.position.set(-5.2, -0.08, 0.2);
+  addToLayer("sea", ocean);
+  addGroundGrid("sea", 18, 10, -0.03, 0x4fb3c7);
+
+  const shore = roundedBox(11.5, 0.12, 10.5, new THREE.MeshStandardMaterial({ color: 0xd9e2d4, roughness: 0.76 }));
+  shore.position.set(7.2, -0.04, 0.2);
+  addToLayer("terrain", shore);
+  addGroundGrid("terrain", 11, 10, 0.03, 0x91a88a);
+
+  addToLayer("assets", buildMiniShipAsset(-5.2, 1.0, 0.74));
+  addLabel(isZh ? "海上通信船" : "Maritime ship", [-7.6, 3.1, 2.0], "#0f766e");
+  addToLayer("space", buildMiniSatelliteAsset(-1.1, 9.2, -2.6, 1.05));
+  addLabel(getSceneLabel("leo-satellite", locale), [-1.1, 10.35, -2.6], "#1e3a8a");
+  addToLayer("assets", buildMiniTower(4.3, -0.6, 0.88));
+  addLabel(isZh ? "岸基 5G 通信塔" : "Shore 5G tower", [4.3, 6.7, -0.6], "#075985");
+  addToLayer("assets", buildMiniCabinet(isZh ? "发送机" : "Transmitter", 7.0, 2.7, 0.72));
+  addToLayer("assets", buildMiniCabinet(isZh ? "接收机" : "Receiver", 7.4, -3.2, 0.72));
+  addToLayer("assets", buildDataCenter(9.7, -0.2));
+  addLabel(isZh ? "边缘数据中心" : "Edge data center", [9.7, 2.0, -0.2], "#075985");
+
+  addToLayer("links", cable([[-3.55, 2.95, 1.0], [-2.8, 6.1, -0.8], [-1.1, 9.2, -2.6]], cableMaterials.beam, 0.032));
+  addToLayer("links", cable([[-1.1, 9.2, -2.6], [1.8, 7.6, -2.1], [4.3, 6.35, -0.6]], cableMaterials.beam, 0.032));
+  addToLayer("links", cable([[4.3, 5.4, -0.6], [6.1, 4.0, 1.0], [7.0, 2.7, 2.7]], cableMaterials.signal, 0.035));
+  addToLayer("links", cable([[4.3, 4.6, -0.6], [6.1, 2.2, -2.0], [7.4, 2.7, -3.2]], cableMaterials.alarm, 0.035));
+  addToLayer("links", cable([[4.3, 0.6, -0.4], [6.2, 0.32, -0.3], [9.7, 1.3, -0.2]], cableMaterials.ground, 0.04));
+  addToLayer("power", cable([[7.0, 0.2, 2.7], [8.0, 0.25, 1.2], [9.7, 0.45, -0.2]], cableMaterials.power, 0.04));
+
+  addLabel(networkScene.display[isZh ? "zh" : "en"].name, [0.5, 7.0, 2.8], "#0f766e");
+  camera.position.set(12.4, 9.1, 15.8);
+  controls.target.set(1.2, 3.2, 0.1);
+}
+
 const builders = {
+  network: buildNetworkScene,
   transmitter: buildTransmitterModel,
   receiver: buildReceiverModel,
   ship: buildShipModel,
@@ -475,7 +663,8 @@ function setupLayerGroups(modelId) {
   clearGroup(modelRoot);
   clearGroup(labelRoot);
   activeLayers = {};
-  getModel(modelId).layers.forEach((layer) => {
+  const layers = modelId === "network" ? networkScene.layers : getModel(modelId).layers;
+  layers.forEach((layer) => {
     activeLayers[layer] = new THREE.Group();
     modelRoot.add(activeLayers[layer]);
   });
@@ -484,6 +673,13 @@ function setupLayerGroups(modelId) {
 function setupModelButtons() {
   const root = document.querySelector("#modelSelector");
   if (!root || root.children.length) return;
+  const sceneButton = document.createElement("button");
+  sceneButton.className = "model-button scene-button";
+  sceneButton.type = "button";
+  sceneButton.dataset.model = "network";
+  sceneButton.textContent = locale.startsWith("zh") ? "综合场景：海陆空通信网络" : "Scene: maritime-space network";
+  sceneButton.addEventListener("click", () => renderModel("network"));
+  root.appendChild(sceneButton);
   getModels().forEach((model) => {
     const display = getModelDisplay(model, locale);
     const button = document.createElement("button");
@@ -500,7 +696,11 @@ function setupToggles(modelId) {
   const toggleRoot = document.querySelector("#layerToggles");
   if (!toggleRoot) return;
   toggleRoot.innerHTML = "";
-  getLayerConfig(modelId, locale).forEach(([key, labelText]) => {
+  const sceneLayerText = locale.startsWith("zh")
+    ? { sea: "海上域", terrain: "岸基域", assets: "对象资产", space: "空间域", links: "跨域链路", signal: "信号路径", power: "电源路径" }
+    : { sea: "Sea domain", terrain: "Shore domain", assets: "Object assets", space: "Space domain", links: "Cross-domain links", signal: "Signal path", power: "Power path" };
+  const layerConfig = modelId === "network" ? networkScene.layers.map((layer) => [layer, sceneLayerText[layer] || layer]) : getLayerConfig(modelId, locale);
+  layerConfig.forEach(([key, labelText]) => {
     const button = document.createElement("button");
     button.className = "layer-toggle active";
     button.type = "button";
@@ -514,6 +714,28 @@ function setupToggles(modelId) {
 }
 
 function populateSpecPanel(modelId) {
+  if (modelId === "network") {
+    const key = locale.startsWith("zh") ? "zh" : "en";
+    const display = networkScene.display[key];
+    const statsRoot = document.querySelector("#specStats");
+    const componentRoot = document.querySelector("#specComponents");
+    const modelTitle = document.querySelector("#activeModelTitle");
+    const modelSummary = document.querySelector("#activeModelSummary");
+    const modelChain = document.querySelector("#activeModelChain");
+    if (modelTitle) modelTitle.textContent = display.name;
+    if (modelSummary) modelSummary.textContent = display.summary;
+    if (modelChain) modelChain.textContent = display.chain;
+    if (statsRoot) statsRoot.innerHTML = display.stats.map((stat) => "<span>" + stat + "</span>").join("");
+    if (componentRoot) {
+      componentRoot.innerHTML = networkScene.components[key]
+        .map(([label, role]) => "<li><strong>" + label + "</strong><span>" + role + "</span></li>")
+        .join("");
+    }
+    document.querySelectorAll(".model-button").forEach((button) => {
+      button.classList.toggle("active", button.dataset.model === "network");
+    });
+    return;
+  }
   const model = getModel(modelId);
   const display = getModelDisplay(model, locale);
   const summary = summarizeModel(modelId, locale);
@@ -549,7 +771,13 @@ function populateSpecPanel(modelId) {
 function renderModel(modelId) {
   activeModelId = builders[modelId] ? modelId : "transmitter";
   const url = new URL(window.location.href);
-  url.searchParams.set("model", activeModelId);
+  if (activeModelId === "network") {
+    url.searchParams.delete("model");
+    url.searchParams.set("scene", networkScene.query);
+  } else {
+    url.searchParams.delete("scene");
+    url.searchParams.set("model", activeModelId);
+  }
   window.history.replaceState({}, "", url);
   setupLayerGroups(activeModelId);
   builders[activeModelId]();

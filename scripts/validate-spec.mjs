@@ -67,13 +67,16 @@ for (const modelName of spec.qualityGate.requiredModelNames) {
 for (const fileCheck of [
   [main, "modelSelector", "main wires the independent model selector"],
   [main, "renderModel", "main renders one selected model at a time"],
-  [main, "ship-reference-3", "main uses ship reference cache version"],
-  [index, "Separate Reconstruction Set", "English UI exposes separate reconstruction set"],
+  [main, "network-scene-1", "main uses network scene cache version"],
+  [main, "function buildNetworkScene", "main defines integrated network scene"],
+  [main, "maritime-network", "main exposes maritime network scene route"],
+  [index, "Asset Library and Scene", "English UI exposes asset library and scene"],
   [index, "modelSelector", "English UI exposes model selector"],
   [zhIndex, "lang=\"zh-CN\"", "Chinese page declares zh-CN locale"],
   [zhIndex, "index.zh.html", "Chinese page keeps a standalone marker"],
   [zhIndex, "modelSelector", "Chinese UI exposes model selector"],
-  [readme, "four independent image2-to-3D", "README documents four independent image2-to-3D models"],
+  [readme, "four reusable image2-to-3D object assets", "README documents reusable image2-to-3D assets"],
+  [readme, "maritime-space communication scene", "README documents integrated scene"],
   [readme, "img2threejs", "README documents img2threejs workflow"],
 ]) {
   fileCheck[0].includes(fileCheck[1]) ? pass(fileCheck[2]) : fail(fileCheck[2]);

@@ -1,5 +1,5 @@
-import spec from "./towerSpec.json?v=ship-reference-3" with { type: "json" };
-import { getText, resolveLocale } from "./i18n.js?v=ship-reference-3";
+import spec from "./towerSpec.json?v=network-scene-1" with { type: "json" };
+import { getText, resolveLocale } from "./i18n.js?v=network-scene-1";
 
 export function getProjectSpec() {
   return spec;
