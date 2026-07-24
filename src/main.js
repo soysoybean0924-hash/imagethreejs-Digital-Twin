@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.166.1/examples/jsm/controls/OrbitControls.js";
-import { getComponentDisplay, getLayerConfig, getModel, getModelDisplay, getModels, getSceneLabel, summarizeModel } from "./towerSpec.js?v=separate-models-1";
+import { getComponentDisplay, getLayerConfig, getModel, getModelDisplay, getModels, getSceneLabel, summarizeModel } from "./towerSpec.js?v=ship-reference-2";
 
 const canvas = document.querySelector("#scene");
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
@@ -268,67 +268,120 @@ function buildReceiverModel() {
   controls.target.set(0, 3.0, 0);
 }
 function buildShipModel() {
-  const ocean = roundedBox(12.5, 0.08, 7.0, mat.ocean);
-  ocean.position.set(0, -0.08, 0);
+  const ocean = roundedBox(13.8, 0.08, 7.4, mat.ocean);
+  ocean.position.set(0, -0.1, 0);
   addToLayer("hull", ocean);
+  for (let i = 0; i < 10; i += 1) {
+    const foam = cable([[-6.2 + i * 1.3, 0.02, -1.85], [-5.75 + i * 1.3, 0.04, -2.25], [-5.25 + i * 1.3, 0.02, -1.9]], cableMaterials.beam, 0.018);
+    addToLayer("hull", foam);
+  }
 
   const hull = new THREE.Group();
-  const mainHull = roundedBox(8.2, 0.88, 1.65, mat.hull);
-  mainHull.position.set(0.15, 0.52, 0);
+  const mainHull = roundedBox(9.0, 0.92, 1.72, mat.hull);
+  mainHull.position.set(0.15, 0.56, 0);
   hull.add(mainHull);
-  const bow = new THREE.Mesh(new THREE.ConeGeometry(0.92, 1.45, 4), mat.hull);
+  const upperHull = roundedBox(8.1, 0.46, 1.42, mat.hull);
+  upperHull.position.set(-0.05, 1.02, 0);
+  hull.add(upperHull);
+  const bow = new THREE.Mesh(new THREE.ConeGeometry(1.05, 1.7, 4), mat.hull);
   bow.rotation.z = -Math.PI * 0.5;
   bow.rotation.y = Math.PI * 0.25;
-  bow.position.set(-4.55, 0.54, 0);
+  bow.position.set(-5.0, 0.72, 0);
   hull.add(bow);
-  const redKeel = roundedBox(7.2, 0.18, 1.45, new THREE.MeshStandardMaterial({ color: 0x8f3b2f, roughness: 0.5 }));
-  redKeel.position.set(0.25, 0.04, 0);
+  const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.56, 32, 16), mat.hull);
+  bulb.scale.set(1.25, 0.72, 0.62);
+  bulb.position.set(-5.45, 0.18, 0);
+  hull.add(bulb);
+  const redKeel = roundedBox(8.0, 0.18, 1.48, new THREE.MeshStandardMaterial({ color: 0x8f3b2f, roughness: 0.5 }));
+  redKeel.position.set(0.2, 0.06, 0);
   hull.add(redKeel);
   addToLayer("hull", hull);
 
-  const deck = roundedBox(6.6, 0.28, 1.45, mat.whitePanel);
-  deck.position.set(-0.15, 1.1, 0);
+  const deck = roundedBox(7.4, 0.28, 1.5, mat.whitePanel);
+  deck.position.set(-0.25, 1.25, 0);
   addToLayer("deck", deck);
-  const bridge = roundedBox(2.2, 1.05, 1.12, mat.whitePanel);
-  bridge.position.set(-2.05, 1.85, 0);
-  addToLayer("deck", bridge);
-  for (let i = 0; i < 6; i += 1) {
-    const window = roundedBox(0.26, 0.22, 0.04, mat.darkGlass);
-    window.position.set(-2.8 + i * 0.3, 2.05, -0.58);
-    addToLayer("deck", window);
+  const bridgeBase = roundedBox(2.9, 0.8, 1.18, mat.whitePanel);
+  bridgeBase.position.set(-2.45, 1.85, 0);
+  addToLayer("deck", bridgeBase);
+  const bridgeTop = roundedBox(2.35, 0.72, 1.08, mat.whitePanel);
+  bridgeTop.position.set(-2.55, 2.55, 0);
+  addToLayer("deck", bridgeTop);
+  for (let row = 0; row < 2; row += 1) {
+    for (let i = 0; i < 8; i += 1) {
+      const window = roundedBox(0.23, 0.2, 0.045, mat.darkGlass);
+      window.position.set(-3.38 + i * 0.27, 2.0 + row * 0.62, -0.61);
+      addToLayer("deck", window);
+    }
   }
+  for (let i = 0; i < 14; i += 1) {
+    const post = cylinderBetween(new THREE.Vector3(-4.1 + i * 0.55, 1.34, -0.86), new THREE.Vector3(-4.1 + i * 0.55, 1.78, -0.86), 0.012, mat.steel, 8);
+    addToLayer("deck", post);
+  }
+  addToLayer("deck", cylinderBetween(new THREE.Vector3(-4.35, 1.76, -0.86), new THREE.Vector3(3.4, 1.76, -0.86), 0.014, mat.steel, 8));
 
-  const bay = roundedBox(1.7, 1.3, 0.22, mat.module);
-  bay.position.set(1.55, 1.65, -0.78);
-  addToLayer("rf", bay);
-  addCableBundle("signal", 1.02, 2.08, 0.95, -0.9, [cableMaterials.signal, cableMaterials.power, cableMaterials.ground, cableMaterials.alarm]);
+  const forwardWinch = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.7, 24), mat.darkSteel);
+  forwardWinch.rotation.z = Math.PI * 0.5;
+  forwardWinch.position.set(-4.05, 1.48, -0.42);
+  addToLayer("deck", forwardWinch);
+  const craneBoom = cylinderBetween(new THREE.Vector3(4.15, 1.65, 0.45), new THREE.Vector3(5.8, 2.35, 0.42), 0.045, mat.steel, 10);
+  addToLayer("deck", craneBoom);
+  addToLayer("deck", cylinderBetween(new THREE.Vector3(4.15, 1.18, 0.45), new THREE.Vector3(4.15, 2.0, 0.45), 0.055, mat.darkSteel, 12));
 
-  const mastA = cylinderBetween(new THREE.Vector3(-0.45, 1.15, 0), new THREE.Vector3(-0.45, 5.8, 0), 0.065, mat.darkSteel);
-  const mastB = cylinderBetween(new THREE.Vector3(0.25, 1.15, 0), new THREE.Vector3(0.25, 5.25, 0), 0.055, mat.darkSteel);
+  const bayFrame = roundedBox(2.05, 1.42, 0.24, mat.whitePanel);
+  bayFrame.position.set(1.45, 1.9, -0.86);
+  addToLayer("rf", bayFrame);
+  addToLayer("rf", buildRack(1.05, 2.42, -1.02, 4, 0.72));
+  addToLayer("rf", buildRack(1.85, 2.42, -1.02, 4, 0.72));
+  addCableBundle("signal", 0.75, 2.58, 1.15, -1.14, [cableMaterials.signal, cableMaterials.power, cableMaterials.ground, cableMaterials.alarm, cableMaterials.signal]);
+  const aftBay = roundedBox(1.45, 1.15, 0.22, mat.module);
+  aftBay.position.set(3.3, 1.68, -0.82);
+  addToLayer("rf", aftBay);
+  addCableBundle("signal", 2.92, 2.0, 1.1, -1.05, [cableMaterials.power, cableMaterials.signal, cableMaterials.ground]);
+
+  const mastA = cylinderBetween(new THREE.Vector3(-0.55, 1.35, 0), new THREE.Vector3(-0.55, 6.75, 0), 0.065, mat.darkSteel);
+  const mastB = cylinderBetween(new THREE.Vector3(0.15, 1.35, 0), new THREE.Vector3(0.15, 6.25, 0), 0.055, mat.darkSteel);
+  const mastC = cylinderBetween(new THREE.Vector3(-0.2, 1.35, -0.48), new THREE.Vector3(-0.2, 5.9, -0.48), 0.045, mat.darkSteel);
   addToLayer("mast", mastA);
   addToLayer("mast", mastB);
-  for (let y = 2.0; y < 5.4; y += 0.75) {
-    addToLayer("mast", cylinderBetween(new THREE.Vector3(-0.8, y, -0.45), new THREE.Vector3(0.6, y + 0.55, 0.45), 0.025, mat.steel));
-    addToLayer("mast", cylinderBetween(new THREE.Vector3(-0.8, y, 0.45), new THREE.Vector3(0.6, y + 0.55, -0.45), 0.025, mat.steel));
+  addToLayer("mast", mastC);
+  for (let y = 2.05; y < 6.35; y += 0.62) {
+    addToLayer("mast", cylinderBetween(new THREE.Vector3(-0.9, y, -0.52), new THREE.Vector3(0.55, y + 0.48, 0.42), 0.022, mat.steel));
+    addToLayer("mast", cylinderBetween(new THREE.Vector3(-0.9, y, 0.42), new THREE.Vector3(0.55, y + 0.48, -0.52), 0.022, mat.steel));
+    addToLayer("mast", cylinderBetween(new THREE.Vector3(-0.88, y, -0.52), new THREE.Vector3(0.55, y, -0.52), 0.018, mat.steel, 8));
   }
-  const radar = buildDish([2.2, 3.25, -0.28], [0.08, -0.58, 0.08], 0.86);
-  addToLayer("antenna", radar);
-  const smallDish = buildDish([-1.1, 3.55, 0.35], [0.14, 0.55, -0.04], 0.48);
-  addToLayer("antenna", smallDish);
-  const dome = new THREE.Mesh(new THREE.SphereGeometry(0.46, 32, 16), mat.antenna);
-  dome.position.set(-0.95, 4.95, 0.25);
-  dome.scale.y = 0.68;
-  addToLayer("antenna", dome);
+  for (const x of [-1.2, 0.65, 1.0]) {
+    const whip = cylinderBetween(new THREE.Vector3(x, 3.0, 0.55), new THREE.Vector3(x, 5.8 + Math.abs(x) * 0.7, 0.55), 0.012, mat.darkSteel, 8);
+    addToLayer("antenna", whip);
+  }
+  const domeLarge = new THREE.Mesh(new THREE.SphereGeometry(0.48, 32, 16), mat.antenna);
+  domeLarge.position.set(-1.15, 4.3, 0.34);
+  domeLarge.scale.y = 0.72;
+  addToLayer("antenna", domeLarge);
+  const domeSmall = new THREE.Mesh(new THREE.SphereGeometry(0.28, 24, 12), mat.antenna);
+  domeSmall.position.set(-2.95, 2.95, 0.55);
+  domeSmall.scale.y = 0.75;
+  addToLayer("antenna", domeSmall);
+  const midDish = buildDish([-0.95, 3.95, -0.45], [0.12, 0.55, -0.08], 0.48);
+  addToLayer("antenna", midDish);
 
-  addToLayer("signal", cable([[1.5, 2.15, -0.78], [0.45, 3.2, -0.35], [-0.35, 5.55, 0]], cableMaterials.signal, 0.04));
-  addToLayer("power", cable([[0.85, 1.45, -0.78], [-0.9, 1.05, -0.2], [-2.6, 0.82, 0.35]], cableMaterials.power, 0.04));
-  addToLayer("antenna", cable([[2.2, 3.35, -0.28], [4.2, 5.7, -1.5], [6.0, 6.3, -2.7]], cableMaterials.beam, 0.026));
+  const dishTowerBase = cylinderBetween(new THREE.Vector3(2.75, 1.15, 0.36), new THREE.Vector3(2.75, 3.25, 0.36), 0.05, mat.steel, 12);
+  addToLayer("mast", dishTowerBase);
+  for (const offset of [-0.32, 0.32]) {
+    addToLayer("mast", cylinderBetween(new THREE.Vector3(2.75 + offset, 1.25, 0.1), new THREE.Vector3(2.75, 3.2, 0.36), 0.022, mat.steel, 8));
+  }
+  const mainDish = buildDish([3.0, 3.65, 0.36], [0.05, -0.72, 0.06], 1.02);
+  addToLayer("antenna", mainDish);
 
-  addLabel(getSceneLabel("maritime-communication-ship", locale), [-2.25, 3.25, 1.05]);
-  addLabel(getSceneLabel("ship-mast", locale), [-1.1, 6.15, 0.1], "#0f766e");
-  addLabel(getSceneLabel("ship-gateway", locale), [2.65, 2.4, -0.68], "#0f766e");
-  camera.position.set(8.8, 5.8, 9.6);
-  controls.target.set(0, 2.4, 0);
+  addToLayer("signal", cable([[1.45, 2.45, -0.95], [0.45, 3.45, -0.4], [-0.35, 6.1, 0]], cableMaterials.signal, 0.04));
+  addToLayer("power", cable([[0.85, 1.45, -0.98], [-0.9, 1.05, -0.2], [-2.9, 0.82, 0.35]], cableMaterials.power, 0.04));
+  addToLayer("signal", cable([[1.2, 2.25, -1.0], [2.3, 2.9, -0.35], [3.0, 3.62, 0.36]], cableMaterials.ground, 0.032));
+  addToLayer("antenna", cable([[3.0, 3.72, 0.36], [4.8, 5.9, -1.45], [6.4, 6.45, -2.75]], cableMaterials.beam, 0.026));
+
+  addLabel(getSceneLabel("maritime-communication-ship", locale), [-2.55, 3.45, 1.05]);
+  addLabel(getSceneLabel("ship-mast", locale), [-1.25, 6.95, 0.1], "#0f766e");
+  addLabel(getSceneLabel("ship-gateway", locale), [2.55, 2.55, -0.75], "#0f766e");
+  camera.position.set(9.2, 6.0, 9.8);
+  controls.target.set(0, 2.8, 0);
 }
 function buildSatelliteModel() {
   const starMat = new THREE.MeshBasicMaterial({ color: 0xffffff });

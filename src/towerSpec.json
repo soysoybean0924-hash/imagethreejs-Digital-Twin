@@ -64,16 +64,19 @@
       "id": "ship",
       "name": "Maritime Communication Ship image2-to-3D",
       "sourceImage": "user-supplied maritime communication ship reference",
-      "summary": "Independent 3D reconstruction of a communication vessel with hull, bridge, mast, radar, satellite dish, exposed equipment bay, colored cables, and ocean reference plane.",
+      "summary": "Independent 3D reconstruction of the supplied maritime communication ship image: long blue hull, red waterline, white bridge, window bands, railings, lattice communication mast, radomes, large satellite dish, aft crane, open equipment bays, colored cable harnesses, and ocean wake.",
       "chain": "shipboard gateway -> mast antennas -> satellite / shore link",
       "layers": ["hull", "deck", "mast", "antenna", "rf", "signal", "power"],
       "components": [
-        { "id": "ship-hull", "label": "Communication vessel hull", "role": "sea platform carrying communications equipment", "layer": "hull" },
-        { "id": "ship-mast", "label": "Integrated communication mast", "role": "mounts antennas, radar, and relay equipment", "layer": "mast" },
-        { "id": "ship-radar", "label": "Maritime radar and satellite dish", "role": "navigation and long-range communication", "layer": "antenna" },
-        { "id": "ship-gateway", "label": "Shipboard gateway cabinet", "role": "routing, RF processing, and power distribution", "layer": "rf" },
-        { "id": "ship-cable-bay", "label": "Exposed cable bay", "role": "visible signal and power harnesses", "layer": "signal" },
-        { "id": "ship-bridge", "label": "Bridge and deckhouse", "role": "command deck below the antenna mast", "layer": "deck" }
+        { "id": "ship-hull", "label": "Long blue vessel hull with red waterline", "role": "sea platform carrying communications equipment", "layer": "hull" },
+        { "id": "ship-bridge", "label": "White bridge and window bands", "role": "multi-level command deck matching the reference silhouette", "layer": "deck" },
+        { "id": "ship-railings", "label": "Deck railings and forward winch", "role": "visible ship deck details and scale cues", "layer": "deck" },
+        { "id": "ship-mast", "label": "Tall lattice communication mast", "role": "mounts whip antennas, radomes, radar, and relay equipment", "layer": "mast" },
+        { "id": "ship-radar", "label": "Large satellite dish and radar set", "role": "navigation and long-range maritime communication", "layer": "antenna" },
+        { "id": "ship-gateway", "label": "Open shipboard gateway equipment bays", "role": "routing, RF processing, and power distribution", "layer": "rf" },
+        { "id": "ship-cable-bay", "label": "Visible colored cable harnesses", "role": "signal, power, and grounding routes exposed in side equipment bays", "layer": "signal" },
+        { "id": "ship-crane", "label": "Aft deck crane boom", "role": "rear service equipment visible in the supplied image", "layer": "deck" },
+        { "id": "ship-ocean-wake", "label": "Ocean plane and wake strokes", "role": "sea context and motion reference", "layer": "hull" }
       ],
       "connections": [
         { "id": "ship-gateway-mast", "label": "gateway -> mast antennas", "kind": "signal", "color": "#14b8a6" },
