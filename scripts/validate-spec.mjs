@@ -67,7 +67,7 @@ for (const modelName of spec.qualityGate.requiredModelNames) {
 for (const fileCheck of [
   [main, "modelSelector", "main wires the independent model selector"],
   [main, "renderModel", "main renders one selected model at a time"],
-  [main, "ship-reference-2", "main uses separate-model cache version"],
+  [main, "ship-reference-3", "main uses ship reference cache version"],
   [index, "Separate Reconstruction Set", "English UI exposes separate reconstruction set"],
   [index, "modelSelector", "English UI exposes model selector"],
   [zhIndex, "lang=\"zh-CN\"", "Chinese page declares zh-CN locale"],
